@@ -1,0 +1,206 @@
+<head>
+  <title>mObywatel</title>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Cache-Control" content="no-cache, now-store, must-revalidate"/>
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+
+  <link rel="stylesheet" href="assets/main.css" />
+  <link rel="icon" type="image/x-icon" href="assets/images/logo.png" />
+
+  <meta name="format-detection" content="telephone=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+  <meta name="mobile-web-app-capable" content="yes" />
+
+<style>
+
+body{
+    font-family: Arial, sans-serif;
+    background:#f2f3f5;
+    margin:0;
+}
+
+/* WRAPPER żeby nie chowało się pod headerem */
+
+.content{
+    padding:20px;
+    margin-top:90px;
+}
+
+/* TABS */
+
+.tabs{
+    display:flex;
+    background:#e9e9eb;
+    border-radius:30px;
+    padding:4px;
+    width:100%;
+    max-width:420px;
+    margin:auto;
+}
+
+.tab{
+    flex:1;
+    text-align:center;
+    padding:10px 0;
+    font-size:14px;
+    border-radius:25px;
+    color:#6b6b6b;
+    transition:0.2s;
+}
+
+.tab.active{
+    background:white;
+    color:#19439e;
+    font-weight:500;
+    box-shadow:0 1px 3px rgba(0,0,0,0.15);
+}
+
+/* INFO BOX */
+
+.info{
+    background:#dbe7f3;
+    padding:15px;
+    border-radius:10px;
+    margin:20px 0;
+    color:#4a5a6a;
+}
+
+/* DATE */
+
+.date{
+    margin:20px 0 10px 0;
+    font-weight:bold;
+}
+
+/* CARD */
+
+.card{
+    background:white;
+    border-radius:15px;
+    padding:15px;
+    margin-bottom:15px;
+    box-shadow:0 1px 3px rgba(0,0,0,0.1);
+}
+
+.status{
+    display:inline-flex;
+    align-items:center;
+    background:#f2f2f2;
+    border-radius:20px;
+    padding:5px 10px;
+    font-size:14px;
+}
+
+.dot{
+    width:8px;
+    height:8px;
+    background:green;
+    border-radius:50%;
+    margin-right:6px;
+}
+
+.title{
+    margin-top:10px;
+    font-size:16px;
+}
+
+.amount{
+    color:#666;
+    margin-top:5px;
+}
+
+/* UKRYWANIE SEKCJI */
+
+.section{
+    display:none;
+}
+
+.section.active{
+    display:block;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="top_grid_fixed">
+    <div class="action_grid_fixed">
+      <img src="assets/images/back_blue.png" class="back_img_fixed"/>
+      <p onclick="sendTo('home')" class="back_text_fixed">Wróć</p>
+    </div>
+
+    <p class="title_text_fixed">Mandaty</p>
+
+    <img src="assets/images/help.png" class="help_img_fixed"/>
+</div>
+
+<div class="content">
+
+<div class="tabs">
+  <div class="tab" onclick="switchTab('unpaid',this)">Nieopłacone</div>
+  <div class="tab active" onclick="switchTab('paid',this)">Opłacone</div>
+</div>
+
+<div class="info">
+Niedawno zapłacony mandat pojawi się tu, gdy system przetworzy płatność.
+</div>
+
+<!-- OPŁACONE -->
+
+<div id="paid" class="section active">
+
+<div class="date">Dzisiaj, 23.06.2023</div>
+
+<div class="card">
+<div class="status"><div class="dot"></div>Opłacony</div>
+<div class="title">Mandat</div>
+<div class="amount">Kwota: 50,00 zł</div>
+</div>
+
+<div class="card">
+<div class="status"><div class="dot"></div>Opłacony</div>
+<div class="title">Mandat</div>
+<div class="amount">Kwota: 50,00 zł</div>
+</div>
+
+</div>
+
+<!-- NIEOPŁACONE -->
+
+<div id="unpaid" class="section">
+
+<div class="date">Do zapłaty</div>
+
+<div class="card">
+<div class="status"><div class="dot" style="background:red"></div>Nieopłacony</div>
+<div class="title">Mandat</div>
+<div class="amount">Kwota: 200,00 zł</div>
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+function switchTab(tab,element){
+
+document.querySelectorAll('.tab').forEach(t=>{
+t.classList.remove('active')
+})
+
+element.classList.add('active')
+
+document.querySelectorAll('.section').forEach(s=>{
+s.classList.remove('active')
+})
+
+document.getElementById(tab).classList.add('active')
+
+}
+
+</script>
+
+</body>

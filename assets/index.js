@@ -106,7 +106,7 @@ document.querySelector(".go").addEventListener("click", () => {
   if (empty.length != 0) {
     empty[0].scrollIntoView({behavior:"smooth"});
   } else {
-    location.href = "/id.html?" + params.toString();
+    location.href = "id.html?" + params.toString();
   }
 });
 

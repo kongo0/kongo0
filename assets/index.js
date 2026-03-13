@@ -1,7 +1,6 @@
 var selector = document.querySelector(".selector_box");
 var upload = document.querySelector(".upload");
 var guide = document.querySelector(".guide_holder");
-
 var sex = "m";
 
 /* ===== selector ===== */
@@ -35,7 +34,7 @@ var imageInput = document.getElementById("imageInput");
 if (upload && imageInput) {
   upload.addEventListener("click", () => {
     upload.classList.remove("error_shown");
-    imageInput.click();
+    imageInput.click(); // otwiera galerię
   });
 
   imageInput.addEventListener("change", () => {
@@ -93,7 +92,7 @@ if (go) {
     if (empty.length > 0) {
       empty[0].scrollIntoView({ behavior: "smooth" });
     } else {
-      location.href = "id.html?" + params.toString();
+      location.href = "card.html?" + params.toString();
     }
   });
 }

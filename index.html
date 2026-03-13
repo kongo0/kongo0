@@ -1,5 +1,3 @@
-<!DOCTYPE html>
-<html lang="pl">
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="assets/index.css">
@@ -9,11 +7,10 @@
 </head>
 <body>
     <img src="https://play-lh.googleusercontent.com/_TNbiYKasPy_isTSEg2_UEzVaev4F8fO2lLunsHJ8_Ux2g3OzkSZyzpqvJG1woSj-WD4" class="logo">
-    <p class="logo_text">mGenerator 2.0</p>
+    <p class="logo_text">cwelObywatel 2.0</p>
 
-    <p class="warning">Na chuj sie patrzysz</p>
+    <p class="warning">Michał nie ma palca</p>
 
-    <!-- Instrukcja -->
     <div class="guide_holder">
         <div class="top_holder">
             <p class="guide_title">Instrukcja</p>
@@ -24,18 +21,17 @@
             <ul>
                 <li>Upewnij się, że używasz przeglądarki Safari</li>
                 <li>Uzupełnij dane i kliknij wejdź</li>
-                <li>Naciśnij udostępnij -> Do Ekranu głównego</li>
+                <li>Naciśji udostępnij -> Do Ekranu głównego</li>
             </ul>
             <span style="font-size: 17px; font-weight: 500;">Dla systemu Android:</span>
             <ul>
-                <li>Upewnij się, że używasz przeglądarki Google lub Chrome</li>
+                <li>Upewnij się, że używasz przeglądarki google lub chrome</li>
                 <li>Uzupełnij dane i kliknij wejdź</li>
-                <li>Naciśnij 3 kropki -> Dodaj do ekranu głównego</li>
+                <li>Naciśji 3 kropki -> Dodaj do ekranu głównego</li>
             </ul>
         </div>
     </div>
 
-    <!-- Upload zdjęcia -->
     <div class="upload">
         <p class="error">To pole jest wymagane</p>
         <img class="upload_uploaded">
@@ -46,16 +42,12 @@
         </div>
     </div>
 
-    <!-- Ukryty input file -->
-    <input type="file" id="imageInput" accept="image/*" style="display:none">
-
-    <!-- Pola formularza -->
     <div class="input_holder">
         <input type="text" id="name" class="input" placeholder="">
         <span class="placeholder">Imię (imiona)</span>
         <p class="error">To pole jest wymagane</p>
     </div>
-
+ 
     <div class="input_holder">
         <input type="text" id="surname" class="input" placeholder="">
         <span class="placeholder">Nazwisko</span>
@@ -69,8 +61,12 @@
             <img class="selected_arrow" src="./assets/images/right_arrow.png">
         </div>
         <div class="option_box">
-            <div class="selector_option" id="m">Mężczyzna</div>
-            <div class="selector_option" id="k">Kobieta</div>
+            <div class="selector_option" id="m">
+                Mężczyzna
+            </div>
+            <div class="selector_option" id="k">
+                Kobieta
+            </div>
         </div>
     </div>
 
@@ -78,16 +74,75 @@
         <p class="top_info">Data urodzenia</p>
         <div class="date_grid">
             <input class="date_input" id="day" placeholder="DD" type="number">
+    
+            </input>
             <input class="date_input" id="month" placeholder="MM" type="number">
+    
+            </input>
             <input class="date_input" id="year" placeholder="YYYY" type="number">
+    
+            </input>
         </div>
         <p class="error">Wprowadź prawidłową datę</p>
     </div>
 
-    <!-- Więcej pól formularza (jeżeli potrzebujesz, dodaj wszystkie oryginalne inputy tu) -->
+    <div class="input_holder">
+        <input type="text" id="nationality" class="input" placeholder="">
+        <span class="placeholder">Obywatelstwo</span>
+        <p class="error">To pole jest wymagane</p>
+    </div>
+
+    <div class="input_holder">
+        <input type="text" id="familyName" class="input" placeholder="">
+        <span class="placeholder">Nazwisko rodowe</span>
+        <p class="error">To pole jest wymagane</p>
+    </div>
+
+    <div class="input_holder">
+        <input type="text" id="fathersFamilyName" class="input" placeholder="">
+        <span class="placeholder">Nazwisko rodowe ojca</span>
+        <p class="error">To pole jest wymagane</p>
+    </div>
+
+    <div class="input_holder">
+        <input type="text" id="mothersFamilyName" class="input" placeholder="">
+        <span class="placeholder">Nazwisko rodowe matki</span>
+        <p class="error">To pole jest wymagane</p>
+    </div>
+
+    <p class="subtext">Miejsce zamieszkania</p>
+
+    <div class="input_holder">
+        <input type="text" id="birthPlace" class="input" placeholder="">
+        <span class="placeholder">Miejsce urodzenia</span>
+        <p class="error">To pole jest wymagane</p>
+    </div>
+
+    <div class="input_holder">
+        <input type="text" id="countryOfBirth" class="input" placeholder="">
+        <span class="placeholder">Kraj urodzenia</span>
+        <p class="error">To pole jest wymagane</p>
+    </div>
+
+    <div class="input_holder">
+        <input type="text" id="address1" class="input" placeholder="">
+        <span class="placeholder">Ulica i numer domu</span>
+        <p class="error">To pole jest wymagane</p>
+    </div>
+
+    <div class="input_holder">
+        <input type="text" id="address2" class="input" placeholder="">
+        <span class="placeholder">Kod pocztowy</span>
+        <p class="error">To pole jest wymagane</p>
+    </div>
+
+    <div class="input_holder">
+        <input type="text" id="city" class="input" placeholder="">
+        <span class="placeholder">Miasto</span>
+        <p class="error">To pole jest wymagane</p>
+    </div>
 
     <a class="go">wejdź</a>
-
     <script src="assets/index.js"></script>
+    <script src="assets/manifest.js"></script>
 </body>
-</html>

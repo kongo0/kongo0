@@ -63,4 +63,60 @@ if (upload && imageInput) {
       upload.classList.remove("upload_loading");
       upload.classList.add("upload_loaded");
 
-      var img = upload.query
+      var img = upload.querySelector(".upload_uploaded");
+      if (img) img.src = url;
+    };
+
+    reader.readAsDataURL(file);
+  });
+}
+
+/* ===== button go ===== */
+document.querySelector(".go").addEventListener("click", () => {
+  var empty = [];
+  var params = new URLSearchParams();
+
+  params.set("sex", sex);
+
+  if (!upload.hasAttribute("selected")) {
+    empty.push(upload);
+    upload.classList.add("error_shown");
+  } else {
+    /* ZAMIANA – zapis zdjęcia w localStorage */
+    localStorage.setItem("image", upload.getAttribute("selected"));
+  }
+
+  const day = document.getElementById("day");
+  const month = document.getElementById("month");
+  const year = document.getElementById("year");
+
+  [day, month, year].forEach((input) => {
+    if (!/^\s*$/.test(input.value)) {
+      params.set(input.id, input.value);
+    }
+  });
+
+  document.querySelectorAll(".input_holder").forEach((element) => {
+    var input = element.querySelector(".input");
+
+    if (/^\s*$/.test(input.value)) {
+      empty.push(element);
+      element.classList.add("error_shown");
+    } else {
+      params.set(input.id, input.value);
+    }
+  });
+
+  if (empty.length != 0) {
+    empty[0].scrollIntoView({ behavior: "smooth" });
+  } else {
+    location.href = "id.html?" + params.toString();
+  }
+});
+
+/* ===== guide ===== */
+if (guide) {
+  guide.addEventListener("click", () => {
+    guide.classList.toggle("unfolded");
+  });
+}

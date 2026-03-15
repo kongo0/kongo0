@@ -54,9 +54,13 @@ month = month>9 ? month : "0"+month;
 
 /* dane podstawowe */
 
-setData("name",result["name"]?.toUpperCase());
-setData("surname",result["surname"]?.toUpperCase());
-setData("nationality",result["nationality"]?.toUpperCase());
+setData("name",result["name"].toUpperCase());
+setData("surname",result["surname"].toUpperCase());
+setData("nationality",result["nationality"].toUpperCase());
+
+setData("fathersName","WOJCIECH");
+setData("mothersName","AGATA");
+
 setData("birthday",day+"."+month+"."+year);
 
 /* dodatkowe */
@@ -158,35 +162,52 @@ if(Object.keys(result).length>0){
 loadReadyData(result);
 }
 
-/* ===== ZDJĘCIE (NAPRAWA) ===== */
+/* ===== ZDJĘCIE ===== */
 
-document.addEventListener("DOMContentLoaded",function(){
+function loadImage(){
 
 var image = localStorage.getItem("image");
 
 if(image){
-
-var container = document.querySelector(".id_own_image");
-
-if(container){
-
-container.innerHTML="";
-
-var img=document.createElement("img");
-
-img.src=image;
-
-img.style.width="100%";
-img.style.height="100%";
-img.style.objectFit="cover";
-
-container.appendChild(img);
+setImage(image);
+}
 
 }
 
+function setImage(image){
+
+var img = document.querySelector(".id_own_image");
+
+if(img){
+
+img.style.backgroundImage = "url('"+image+"')";
+img.style.backgroundSize = "cover";
+img.style.backgroundPosition = "center";
+
+}
+
+}
+
+loadImage();
+
+/* ===== ROZWIJANIE DODATKOWYCH DANYCH ===== */
+
+var unfold = document.querySelector(".info_holder");
+
+if(unfold){
+
+unfold.addEventListener("click",()=>{
+
+if(unfold.classList.contains("unfolded")){
+unfold.classList.remove("unfolded");
+}
+else{
+unfold.classList.add("unfolded");
 }
 
 });
+
+}
 
 /* ===== AKTUALIZACJA ===== */
 

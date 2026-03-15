@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+<title>Szczegóły mandatu</title>
+
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<link rel="stylesheet" href="assets/main.css"/>
+
+<style>
+
+body{
+font-family: Arial, sans-serif;
+background:#f2f3f5;
+margin:0;
+}
+
+/* CONTENT */
+
+.content{
+padding:20px;
+margin-top:90px;
+}
+
+/* GÓRNA KARTA */
+
+.details_card{
+background:white;
+border-radius:16px;
+padding:25px;
+margin-bottom:20px;
+box-shadow:0 2px 6px rgba(0,0,0,0.08);
+text-align:center;
+}
+
+/* STATUS */
+
+.status_big{
+display:inline-flex;
+align-items:center;
+background:#f2f2f2;
+padding:6px 14px;
+border-radius:20px;
+font-size:14px;
+margin-bottom:10px;
+}
+
+.dot{
+width:8px;
+height:8px;
+background:green;
+border-radius:50%;
+margin-right:6px;
+}
+
+/* KWOTA */
+
+.amount_big{
+font-size:32px;
+font-weight:600;
+margin-top:5px;
+}
+
+/* LISTA SZCZEGÓŁÓW */
+
+.details_list{
+background:white;
+border-radius:16px;
+overflow:hidden;
+box-shadow:0 2px 6px rgba(0,0,0,0.08);
+}
+
+/* WIERSZ */
+
+.detail_row{
+display:flex;
+justify-content:space-between;
+padding:16px;
+border-bottom:1px solid #eee;
+}
+
+.detail_row:last-child{
+border-bottom:none;
+}
+
+/* LEWA STRONA */
+
+.detail_label{
+color:#6b6b6b;
+font-size:14px;
+}
+
+/* PRAWA STRONA */
+
+.detail_value{
+font-size:14px;
+font-weight:500;
+}
+
+.paid{
+color:#ff0000;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<!-- HEADER (taki sam jak u Ciebie) -->
+
+<div class="top_grid_fixed">
+
+<div class="action_grid_fixed">
+<img src="assets/images/back_blue.png" class="back_img_fixed"/>
+<p onclick="location.href='mandaty.html'" class="back_text_fixed">Wróć</p>
+</div>
+
+<p class="title_text_fixed">Szczegóły mandatu</p>
+
+<img src="assets/images/help.png" class="help_img_fixed"/>
+
+</div>
+
+
+<div class="content">
+
+<!-- GÓRNA KARTA -->
+
+<div class="details_card">
+
+<div class="status_big">
+<div class="dot"></div>
+Nieopłacony
+</div>
+
+<div class="amount_big">
+50,00 zł
+</div>
+
+</div>
+
+
+<!-- SZCZEGÓŁY -->
+
+<div class="details_list">
+
+<div class="detail_row">
+<p class="detail_label">Typ należności</p>
+<p class="detail_value">Mandat karny</p>
+</div>
+
+<div class="detail_row">
+<p class="detail_label">Powód wystawienia</p>
+<p class="detail_value">Wychodzenie z natanem</p>
+</div>
+
+<div class="detail_row">
+<p class="detail_label">Data wystawienia</p>
+<p class="detail_value">23.01.2026</p>
+</div>
+
+<div class="detail_row">
+<p class="detail_label">Organ wystawiający</p>
+<p class="detail_value">Policja</p>
+</div>
+
+<div class="detail_row">
+<p class="detail_label">Status płatności</p>
+<p class="detail_value paid">Nieopłacony</p>
+</div>
+
+<div class="detail_row">
+<p class="detail_label">Kwota</p>
+<p class="detail_value">200,00 zł</p>
+</div>
+
+</div>
+
+</div>
+
+</body>
+</html>

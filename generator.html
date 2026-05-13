@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>mbywatel v4.0</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #0b0b10;
+            color: white;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 420px;
+            background: #1a1a25;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin: 6px 0;
+            border-radius: 6px;
+            border: none;
+        }
+
+        button {
+            background: #7c3aed;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h2>Generator</h2>
+
+    <form id="dataGenerator">
+
+        <input id="name" placeholder="Imię" required>
+        <input id="surname" placeholder="Nazwisko" required>
+
+        <select id="sex">
+            <option value="MĘŻCZYZNA">MĘŻCZYZNA</option>
+            <option value="KOBIETA">KOBIETA</option>
+        </select>
+
+        <input type="date" id="birthday" required>
+
+        <input id="nationality" placeholder="Obywatelstwo" value="POLSKIE">
+
+        <input id="pesel" placeholder="PESEL" maxlength="11">
+
+        <input id="mdow_series" placeholder="Seria mDowodu">
+
+        <input id="issue_date" placeholder="Data wydania DD.MM.RRRR">
+        <input id="expiry_date" placeholder="Data ważności DD.MM.RRRR">
+
+        <button type="button" id="autofillButton">Autofill</button>
+        <button type="submit">GENERUJ</button>
+
+    </form>
+</div>
+
+<script>
+const form = document.getElementById("dataGenerator");
+
+const nameInput = document.getElementById("name");
+const surnameInput = document.getElementById("surname");
+const sexInput = document.getElementById("sex");
+const birthdayInput = document.getElementById("birthday");
+const peselInput = document.getElementById("pesel");
+const seriesInput = document.getElementById("mdow_series");
+const issueInput = document.getElementById("issue_date");
+const expiryInput = document.getElementById("expiry_date");
+const nationalityInput = document.getElementById("nationality");
+
+function formatDate(date) {
+    const d = String(date.getDate()).padStart(2, "0");
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const y = date.getFullYear();
+    return `${d}.${m}.${y}`;
+}
+
+function genPesel(date, sex) {
+    const y = date.getFullYear() % 100;
+    let m = date.getMonth() + 1;
+    const d = date.getDate();
+
+    if (date.getFullYear() >= 2000) m += 20;
+
+    const sexPart = sex === "KOBIETA" ? "0382" : "0295";
+
+    return `${String(y).padStart(2,"0")}${String(m).padStart(2,"0")}${String(d).padStart(2,"0")}${sexPart}`.slice(0,11);
+}
+
+document.getElementById("autofillButton").addEventListener("click", () => {
+
+    const birth = new Date(birthdayInput.value);
+    if (!birthdayInput.value) return alert("Najpierw wybierz datę urodzenia");
+
+    const issue = new Date(birth);
+    issue.setFullYear(issue.getFullYear() + 18);
+    issue.setDate(issue.getDate() + 1);
+
+    const expiry = new Date(issue);
+    expiry.setFullYear(expiry.getFullYear() + 5);
+
+    peselInput.value = genPesel(birth, sexInput.value);
+    seriesInput.value = "MWYC " + Math.floor(10000 + Math.random() * 90000);
+
+    issueInput.value = formatDate(issue);
+    expiryInput.value = formatDate(expiry);
+});
+
+form.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const birthDate = new Date(birthdayInput.value);
+
+    const data = {
+        imie: nameInput.value,
+        nazwisko: surnameInput.value,
+        pesel: peselInput.value,
+        obywatelstwo: nationalityInput.value,
+        dataUrodzenia: formatDate(birthDate),
+        seria: seriesInput.value,
+        issue: issueInput.value,
+        expiry: expiryInput.value
+    };
+
+    // 🔥 KLUCZOWA POPRAWKA: to jest TO czego używa dowod.html
+    localStorage.setItem("mdowod_data", JSON.stringify(data));
+
+    window.location.href = "dowod.html";
+});
+</script>
+
+</body>
+</html>

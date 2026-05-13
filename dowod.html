@@ -220,5 +220,33 @@
     </section>
 
 </body>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const data = JSON.parse(localStorage.getItem("mdowod_data"));
 
+  if (!data) return;
+
+  // podstawowe dane
+  document.getElementById("display-name").textContent = data.imie || "Brak danych";
+  document.getElementById("display-surname").textContent = data.nazwisko || "Brak danych";
+  document.getElementById("display-nationality").textContent = data.obywatelstwo || "Brak danych";
+  document.getElementById("display-birthDate").textContent = data.dataUrodzenia || "Brak danych";
+  document.getElementById("display-pesel").textContent = data.pesel || "Brak danych";
+
+  // dane dokumentu
+  document.getElementById("idSeriesMain").textContent = data.seria || "Brak danych";
+  document.getElementById("expiryDateMain").textContent = data.expiry || "Brak danych";
+  document.getElementById("issueDateMain").textContent = data.issue || "Brak danych";
+
+  // też w overlay (druga sekcja)
+  const idSeries = document.getElementById("idSeries");
+  if (idSeries) idSeries.textContent = data.seria || "Brak danych";
+
+  const expiry = document.getElementById("expiryDate");
+  if (expiry) expiry.textContent = data.expiry || "Brak danych";
+
+  const issue = document.getElementById("issueDate");
+  if (issue) issue.textContent = data.issue || "Brak danych";
+});
+</script>
 </html>

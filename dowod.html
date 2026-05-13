@@ -13,7 +13,6 @@
 
     <title>xObywatel 4.0</title>
 
-    <!-- THEME INIT -->
     <script>
         !function () {
             try {
@@ -25,7 +24,6 @@
         }()
     </script>
 
-    <!-- BASIC STYLE -->
     <style>
         body {
             margin: 0;
@@ -61,18 +59,13 @@
         }
     </style>
 
-    <!-- DEV CONFIG -->
     <script src="js/dev-config.js"></script>
 
-    <!-- SECURITY CHECK -->
     <script>
         (function () {
             "use strict";
 
-            if (window.DEV_CONFIG && window.DEV_CONFIG.DEV_MODE) {
-                console.warn("[DEV_MODE] pomijam zabezpieczenia");
-                return;
-            }
+            if (window.DEV_CONFIG && window.DEV_CONFIG.DEV_MODE) return;
 
             function isMobile() {
                 const ua = navigator.userAgent.toLowerCase();
@@ -87,28 +80,6 @@
                 );
             }
 
-            function hasAuthToken() {
-                try {
-                    const openRequest = indexedDB.open("obywatel_auth", 1);
-
-                    openRequest.onsuccess = function (event) {
-                        const db = event.target.result;
-                        const tx = db.transaction("auth_state", "readonly");
-                        const store = tx.objectStore("auth_state");
-                        const getRequest = store.get("auth_state");
-
-                        getRequest.onsuccess = function () {
-                            const authState = getRequest.result;
-                            if (!authState || !authState.refreshToken) {
-                                window.location.href = "./index.html";
-                            }
-                        };
-                    };
-                } catch (err) {
-                    window.location.href = "./index.html";
-                }
-            }
-
             if (!isMobile()) {
                 window.location.href = "./index.html";
                 document.documentElement.style.display = "none";
@@ -120,55 +91,20 @@
                 document.documentElement.style.display = "none";
                 throw new Error("Not standalone");
             }
-
-            hasAuthToken();
         })();
     </script>
 
-    <!-- ASSETS -->
     <link rel="icon" href="favicon.ico">
     <link rel="apple-touch-icon" href="icon.png">
     <link rel="manifest" href="manifest.json">
 
-    <link rel="preconnect" href="https://butilive.adadad1314asda.workers.dev" crossorigin>
-
-    <link rel="preload" href="css/main.css" as="style">
-    <link rel="preload" href="css/common.css" as="style">
-    <link rel="preload" href="css/pages/dowod.css" as="style">
-
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/common.css">
     <link rel="stylesheet" href="css/pages/dowod.css">
-    <link rel="stylesheet" href="css/theme.css">
-    <link rel="stylesheet" href="css/overlay-camera.css">
-
-    <!-- JS -->
-    <script src="js/theme.js" defer></script>
-    <script src="js/header.js" defer></script>
-    <script src="js/pages/dowod.js" defer></script>
-    <script src="js/protection.js"></script>
-
-    <!-- SERVICE WORKER -->
-    <script>
-        if ("serviceWorker" in navigator) {
-            window.addEventListener("load", function () {
-
-                navigator.serviceWorker.register("/sw.js")
-                    .then(function (registration) {
-                        console.log("[SW] OK:", registration.scope);
-                    })
-                    .catch(function (err) {
-                        console.error("[SW] ERROR:", err);
-                    });
-
-            });
-        }
-    </script>
 </head>
 
 <body>
 
-    <!-- HEADER -->
     <header class="app-header dowod-header">
         <div class="header-left">
             <a href="documents.html" class="back-link">
@@ -182,7 +118,6 @@
 
     <p class="czas"></p>
 
-    <!-- MAIN -->
     <main>
         <section id="lew">
             <div class="photo-container">
@@ -203,13 +138,11 @@
         </section>
     </main>
 
-    <!-- STATUS -->
     <section id="bottom">
         <svg class="status-checkmark"></svg>
         <p>Dokument ważny</p>
     </section>
 
-    <!-- QUICK ACTIONS -->
     <section class="actions">
         <div class="quick-actions">
             <button>Potwierdź dane</button>
@@ -220,33 +153,19 @@
     </section>
 
 </body>
+
 <script>
 document.addEventListener("DOMContentLoaded", () => {
   const data = JSON.parse(localStorage.getItem("mdowod_data"));
 
   if (!data) return;
 
-  // podstawowe dane
   document.getElementById("display-name").textContent = data.imie || "Brak danych";
   document.getElementById("display-surname").textContent = data.nazwisko || "Brak danych";
   document.getElementById("display-nationality").textContent = data.obywatelstwo || "Brak danych";
   document.getElementById("display-birthDate").textContent = data.dataUrodzenia || "Brak danych";
   document.getElementById("display-pesel").textContent = data.pesel || "Brak danych";
-
-  // dane dokumentu
-  document.getElementById("idSeriesMain").textContent = data.seria || "Brak danych";
-  document.getElementById("expiryDateMain").textContent = data.expiry || "Brak danych";
-  document.getElementById("issueDateMain").textContent = data.issue || "Brak danych";
-
-  // też w overlay (druga sekcja)
-  const idSeries = document.getElementById("idSeries");
-  if (idSeries) idSeries.textContent = data.seria || "Brak danych";
-
-  const expiry = document.getElementById("expiryDate");
-  if (expiry) expiry.textContent = data.expiry || "Brak danych";
-
-  const issue = document.getElementById("issueDate");
-  if (issue) issue.textContent = data.issue || "Brak danych";
 });
 </script>
+
 </html>

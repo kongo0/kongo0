@@ -1260,3 +1260,26 @@ footer {
   background-position: center;
   pointer-events: none;
 }
+/* ===== TOGGLE "Twoje dodatkowe dane" ===== */
+
+#extra-content {
+  display: none;
+  overflow: hidden;
+}
+
+#extra-content.open {
+  display: block;
+}
+
+#extra-toggle {
+  cursor: pointer;
+  user-select: none;
+}
+
+#extra-toggle.active #extra-arrow {
+  transform: rotate(180deg);
+}
+
+#extra-arrow {
+  transition: transform 0.2s ease;
+}

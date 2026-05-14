@@ -1262,13 +1262,12 @@ footer {
 }
 /* ===== TOGGLE "Twoje dodatkowe dane" ===== */
 
-#extra-content {
-  display: none;
-  overflow: hidden;
-}
+/* ===== TOGGLE "Twoje dodatkowe dane" ===== */
 
-#extra-content.open {
-  display: block;
+#extra-content {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.35s ease;
 }
 
 #extra-toggle {
@@ -1276,10 +1275,6 @@ footer {
   user-select: none;
 }
 
-#extra-toggle.active #extra-arrow {
-  transform: rotate(180deg);
-}
-
 #extra-arrow {
-  transition: transform 0.2s ease;
+  transition: transform 0.25s ease;
 }

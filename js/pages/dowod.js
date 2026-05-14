@@ -240,21 +240,21 @@ function bindExtraToggle() {
 
     let open = false;
 
-    content.style.overflow = "hidden";
-    content.style.maxHeight = "0px";
-    content.style.transition = "max-height 0.3s ease";
-
-    toggle.style.cursor = "pointer";
-
     toggle.addEventListener("click", () => {
         open = !open;
 
         if (open) {
             content.style.maxHeight = content.scrollHeight + "px";
-            if (arrow) arrow.style.transform = "rotate(180deg)";
+
+            if (arrow) {
+                arrow.style.transform = "rotate(180deg)";
+            }
         } else {
             content.style.maxHeight = "0px";
-            if (arrow) arrow.style.transform = "rotate(0deg)";
+
+            if (arrow) {
+                arrow.style.transform = "rotate(0deg)";
+            }
         }
     });
 }

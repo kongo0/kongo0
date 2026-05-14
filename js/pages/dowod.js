@@ -289,3 +289,22 @@ window.addEventListener("load", () => {
     window.openCamera = openCamera;
     window.closeCamera = closeCamera;
 });
+function bindExtraToggle() {
+    const toggle = document.getElementById("extra-toggle");
+    const content = document.getElementById("extra-content");
+    const arrow = document.getElementById("extra-arrow");
+
+    if (!toggle || !content) return;
+
+    toggle.addEventListener("click", () => {
+        const isOpen = content.classList.contains("open");
+
+        if (isOpen) {
+            content.classList.remove("open");
+            toggle.classList.remove("active");
+        } else {
+            content.classList.add("open");
+            toggle.classList.add("active");
+        }
+    });
+}

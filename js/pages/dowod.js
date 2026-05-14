@@ -23,6 +23,37 @@ function setImg(id, value) {
 }
 
 /* =========================
+   ID DATA (OVERLAY)
+========================= */
+function generateIdData() {
+    const series = getData("mdow_series", "md_idSeries");
+
+    const status = "Wydany";
+    const issuer = "Urząd Miasta Warszawy";
+
+    const now = new Date();
+
+    const issueDate = new Date();
+    issueDate.setFullYear(now.getFullYear() - 1);
+
+    const expiryDate = new Date(issueDate);
+    expiryDate.setFullYear(issueDate.getFullYear() + 4);
+
+    const pad = (n) => (n < 10 ? "0" + n : n);
+
+    const format = (d) =>
+        `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()}`;
+
+    return {
+        series,
+        status,
+        issuer,
+        issueDate: format(issueDate),
+        expiryDate: format(expiryDate)
+    };
+}
+
+/* =========================
    CLOCK
 ========================= */
 function startClock() {
@@ -119,7 +150,35 @@ function closeCamera() {
 }
 
 /* =========================
-   LOAD DATA (GŁÓWNY WIDOK)
+   TOAST
+========================= */
+function showToast(msg) {
+    const n = document.getElementById("notification");
+    if (!n) return;
+
+    const t = n.querySelector(".notification-text");
+    if (t && msg) t.textContent = msg;
+
+    n.style.display = "block";
+    n.classList.add("show");
+
+    setTimeout(() => {
+        n.classList.remove("show");
+        n.style.display = "none";
+    }, 3000);
+}
+
+/* =========================
+   COPY
+========================= */
+function copy(text, msg) {
+    navigator.clipboard.writeText(text || "").then(() => {
+        showToast(msg || "Skopiowano");
+    });
+}
+
+/* =========================
+   LOAD DATA
 ========================= */
 function loadData() {
 
@@ -154,36 +213,44 @@ function loadData() {
 }
 
 /* =========================
-   DANE DOWODU (OVERLAY FIX)
+   DOWÓD OVERLAY
 ========================= */
 function openIdOverlay() {
+    const d = generateIdData();
 
-    const series = getData("mdow_series", "md_idSeries");
+    const el = document.getElementById("idcard-data-overlay");
+    if (el) el.style.display = "block";
 
-    const now = new Date();
-
-    const issueDate = new Date();
-    issueDate.setFullYear(now.getFullYear() - 1);
-
-    const expiryDate = new Date();
-    expiryDate.setFullYear(now.getFullYear() + 4);
-
-    const pad = (n) => (n < 10 ? "0" + n : n);
-
-    const format = (d) =>
-        `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()}`;
-
-    document.getElementById("idcard-data-overlay").style.display = "block";
-
-    setText("idSeries", series);
-    setText("docStatus", "Wydany");
-    setText("issuingAuthority", "Urząd Miasta Warszawy");
-    setText("issueDate", format(issueDate));
-    setText("expiryDate", format(expiryDate));
+    setText("idSeries", d.series);
+    setText("docStatus", d.status);
+    setText("issuingAuthority", d.issuer);
+    setText("issueDate", d.issueDate);
+    setText("expiryDate", d.expiryDate);
 }
 
 /* =========================
-   UI
+   TOGGLE DODATKOWE DANE
+========================= */
+function bindExtraToggle() {
+    const toggle = document.getElementById("extra-toggle");
+    const content = document.getElementById("extra-content");
+    const arrow = document.getElementById("extra-arrow");
+
+    if (!toggle || !content) return;
+
+    content.style.display = "none";
+    let open = false;
+
+    toggle.addEventListener("click", () => {
+        open = !open;
+
+        content.style.display = open ? "block" : "none";
+        if (arrow) arrow.style.transform = open ? "rotate(180deg)" : "rotate(0deg)";
+    });
+}
+
+/* =========================
+   UI BIND
 ========================= */
 function bindUI() {
 
@@ -207,6 +274,7 @@ window.addEventListener("load", () => {
     applyProfileImage();
     startClock();
     bindUI();
+    bindExtraToggle();
 
     window.openCamera = openCamera;
     window.closeCamera = closeCamera;

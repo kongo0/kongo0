@@ -7,9 +7,6 @@ document.addEventListener("DOMContentLoaded", () => {
         console.warn("Błąd danych:", e);
     }
 
-    // =========================
-    // POMOCNICZE
-    // =========================
     const setText = (id, value) => {
         const el = document.getElementById(id);
         if (!el) return;
@@ -27,7 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setText("display-expiryDate", data.expiry_date);
 
     // =========================
-    // NUMER LEGITYMACJI (POPRAWIONY)
+    // NUMER LEGITYMACJI
     // =========================
     const cardNumber =
         data.schoolId ||
@@ -52,29 +49,35 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // =========================
-    // DANE SZKOŁY
+    // RANDOM DANE SZKOŁY (NOWE)
     // =========================
-    setText("display-schoolName_legszk", data.schoolName);
-    setText("display-schoolAddress_legszk", data.schoolAddress);
-    setText("display-schoolPhone_legszk", data.schoolPhone);
-    setText("display-schoolDirector_legszk", data.schoolDirector);
+    const school = generateSchoolData();
+
+    setText("display-schoolName_legszk", data.schoolName || school.name);
+    setText("display-schoolAddress_legszk", data.schoolAddress || school.address);
+    setText("display-schoolPhone_legszk", data.schoolPhone || school.phone);
+    setText("display-schoolDirector_legszk", data.schoolDirector || school.director);
 
     // =========================
-    // CZAS / HEADER
+    // DODATKOWE DANE - DOMYŚLNIE ZAMKNIĘTE
     // =========================
-    updateClock();
-    setInterval(updateClock, 1000);
-
-    // =========================
-    // TOGGLE "DODATKOWE DANE"
-    // =========================
-    const toggle = document.getElementById("extra-toggle");
     const content = document.getElementById("extra-content");
     const arrow = document.getElementById("extra-arrow");
+
+    if (content) {
+        content.style.display = "none"; // 🔥 NA START ZAMKNIĘTE
+    }
+
+    if (arrow) {
+        arrow.style.transform = "rotate(0deg)";
+    }
+
+    const toggle = document.getElementById("extra-toggle");
 
     if (toggle && content) {
         toggle.addEventListener("click", () => {
             const isOpen = content.style.display === "block";
+
             content.style.display = isOpen ? "none" : "block";
 
             if (arrow) {
@@ -86,7 +89,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // =========================
-    // AKTUALIZUJ BUTTON
+    // ZEGAR
+    // =========================
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    // =========================
+    // AKTUALIZUJ
     // =========================
     const btn = document.getElementById("aktualizuj");
 
@@ -105,14 +114,39 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // =========================
-// FUNKCJE GLOBALNE
+// GENERATORY
 // =========================
 
 function generateSchoolId() {
     const year = new Date().getFullYear();
-    const part1 = Math.floor(1000 + Math.random() * 9000);
-    const part2 = Math.floor(10000 + Math.random() * 90000);
-    return `${year}/${part1}/${part2}`;
+    const a = Math.floor(1000 + Math.random() * 9000);
+    const b = Math.floor(10000 + Math.random() * 90000);
+    return `${year}/${a}/${b}`;
+}
+
+function generateSchoolData() {
+    const schools = [
+        {
+            name: "Liceum Ogólnokształcące nr 3 im. Jana III Sobieskiego",
+            address: "ul. Mickiewicza 12, Warszawa",
+            phone: "+48 22 123 45 67",
+            director: "mgr Anna Kowalska"
+        },
+        {
+            name: "Technikum Informatyczne nr 1",
+            address: "ul. Polna 8, Warszawa",
+            phone: "+48 22 987 65 43",
+            director: "mgr inż. Marek Nowak"
+        },
+        {
+            name: "Szkoła Podstawowa nr 45",
+            address: "ul. Słoneczna 15, Warszawa",
+            phone: "+48 22 555 33 11",
+            director: "mgr Ewa Wiśniewska"
+        }
+    ];
+
+    return schools[Math.floor(Math.random() * schools.length)];
 }
 
 function updateClock() {
@@ -121,11 +155,9 @@ function updateClock() {
 
     const now = new Date();
 
-    const time = now.toLocaleTimeString("pl-PL", {
+    el.textContent = now.toLocaleTimeString("pl-PL", {
         hour: "2-digit",
         minute: "2-digit",
-        second: "2-digit",
+        second: "2-digit"
     });
-
-    el.textContent = time;
 }

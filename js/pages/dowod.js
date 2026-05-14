@@ -1,5 +1,15 @@
 const mobyData = JSON.parse(localStorage.getItem("mobywatel_data") || "{}");
 
+const data = JSON.parse(localStorage.getItem("mobywatel_data") || "{}");
+
+// MAPA dla overlay "Dane dowodu"
+localStorage.setItem("do_idSeries", data.mdow_series || "");
+localStorage.setItem("do_expiryDate", data.expiry_date || "");
+localStorage.setItem("do_issueDate", data.issue_date || "");
+localStorage.setItem("do_issuingAuthority", data.issuing_authority || "");
+localStorage.setItem("fathername", data.father_name || "");
+localStorage.setItem("mothername", data.mother_name || "");
+
 /* =========================
    DATA HELPERS
 ========================= */

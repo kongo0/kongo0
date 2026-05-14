@@ -5,44 +5,57 @@ setTimeout(function () {
 }, 0);
 
 /* =========================
-   🔥 SYNC Z GENERATORA (NOWE)
+   🔥 SYNC DANYCH Z GENERATORA
    ========================= */
 (function syncFromGenerator() {
   try {
-    const raw = localStorage.getItem("mobywatel_data");
+    const raw =
+      localStorage.getItem("mobywatel_data") ||
+      localStorage.getItem("mobyvatel_data");
+
     if (!raw) return;
 
     const data = JSON.parse(raw);
 
-    const map = {
-      "display-name_legszk": data.name,
-      "display-surname_legszk": data.surname,
-      "display-birthDate_legszk": data.birthday,
-      "display-pesel_legszk": data.pesel,
-      "display-cardNumber_legszk": data.mdow_series,
-      "display-issueDate_legszk": data.issue_date,
-      "display-expiryDate_legszk": data.expiry_date,
-      "display-schoolName_legszk": data.schoolName,
-      "display-schoolAddress_legszk": data.schoolAddress,
-      "display-schoolPhone_legszk": data.schoolPhone,
-      "display-schoolDirector_legszk": data.schoolDirector,
-      "display-nationality_legszk": data.nationality,
-      "display-city_legszk": data.city,
-      "display-birthPlace_legszk": data.birthPlace,
-      "display-birth_country_legszk": data.birth_country,
-      "display-address_legszk": data.adress1,
-      "display-postal_code_legszk": data.adress2
+    const set = (id, value, formatter) => {
+      const el = document.getElementById(id);
+      if (!el || value == null || value === "") return;
+
+      el.textContent = formatter ? formatter(value) : value;
     };
 
-    for (const key in map) {
-      if (map[key]) {
-        localStorage.setItem(key, map[key]);
-      }
-    }
+    const up = (s) => (s ? String(s).toUpperCase() : s);
 
-    // zdjęcie profilowe
-    if (data.image) {
-      localStorage.setItem("profileImage", data.image);
+    const formatDate = (val) => {
+      if (!val) return val;
+      // YYYY-MM-DD → DD.MM.YYYY
+      if (val.includes("-")) {
+        const p = val.split("-");
+        if (p.length === 3) return `${p[2]}.${p[1]}.${p[0]}`;
+      }
+      return val;
+    };
+
+    // MAIN FIELDS (HTML legszk)
+    set("display-name", data.name, up);
+    set("display-surname", data.surname, up);
+    set("display-birthDate", data.birthday, formatDate);
+    set("display-pesel", data.pesel, up);
+    set("display-cardNumber", data.mdow_series, up);
+    set("display-issueDate", data.issue_date);
+    set("display-expiryDate", data.expiry_date);
+
+    // EXTRA SCHOOL DATA
+    set("display-schoolName_legszk", data.schoolName, up);
+    set("display-schoolAddress_legszk", data.schoolAddress, up);
+    set("display-schoolPhone_legszk", data.schoolPhone);
+    set("display-schoolDirector_legszk", data.schoolDirector, up);
+
+    // IMAGE
+    const img = document.getElementById("profileImage");
+    if (img && data.image) {
+      img.src = data.image;
+      img.style.opacity = "1";
     }
   } catch (e) {
     console.log("SYNC ERROR:", e);
@@ -50,7 +63,7 @@ setTimeout(function () {
 })();
 
 /* =========================
-   PRELOAD BACKGROUND
+   PRELOAD TŁA
    ========================= */
 (async function preloadBackgroundImage() {
   try {
@@ -67,9 +80,7 @@ setTimeout(function () {
     img.onload = async function () {
       try {
         const response = await fetch(bgUrl);
-        if (response.ok) {
-          await cache.put(bgUrl, response);
-        }
+        if (response.ok) await cache.put(bgUrl, response);
       } catch (_) {}
     };
 
@@ -80,28 +91,14 @@ setTimeout(function () {
 })();
 
 /* =========================
-   RESZTA TWOJEGO KODU (BEZ ZMIAN)
+   ZDJĘCIE PROFILOWE
    ========================= */
-
 async function applyProfileImage() {
   try {
-    var profileImage = document.getElementById("profileImage");
+    const profileImage = document.getElementById("profileImage");
     if (!profileImage) return;
 
-    try {
-      const cache = await caches.open("profile-images-v1");
-      const cachedResponse = await cache.match("profile-image");
-      if (cachedResponse) {
-        const blob = await cachedResponse.blob();
-        const objectURL = URL.createObjectURL(blob);
-        profileImage.src = objectURL;
-        profileImage.style.opacity = "1";
-        return;
-      }
-    } catch (cacheErr) {}
-
-    var stored =
-      localStorage.getItem("profileImage") || localStorage.getItem("photo");
+    const stored = localStorage.getItem("profileImage");
 
     if (stored) {
       profileImage.src = stored;
@@ -110,12 +107,101 @@ async function applyProfileImage() {
   } catch (_) {}
 }
 
-/* =========================================================
-   👉 TU ZOSTAJE CAŁY TWÓJ ORYGINALNY legszk.js BEZ ZMIAN
-   ========================================================= */
-
+/* =========================
+   KAMERA
+   ========================= */
 let cameraStream = null;
 let cameraContainerEl = null;
 let cameraVideoEl = null;
 
-/* ... RESZTA TWOJEGO PLIKU BEZ ZMIAN ... */
+function closeCamera() {
+  if (cameraStream) {
+    cameraStream.getTracks().forEach((t) => t.stop());
+    cameraStream = null;
+  }
+  if (cameraVideoEl) {
+    cameraVideoEl.srcObject = null;
+  }
+  if (cameraContainerEl) {
+    cameraContainerEl.style.display = "none";
+  }
+}
+
+async function openCamera() {
+  cameraContainerEl = document.getElementById("camera-container");
+  cameraVideoEl = document.getElementById("camera-view");
+
+  if (!cameraContainerEl || !cameraVideoEl) {
+    window.location.href = "qr.html?scan=1";
+    return;
+  }
+
+  cameraContainerEl.style.display = "block";
+
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: "environment" },
+    });
+
+    cameraStream = stream;
+    cameraVideoEl.srcObject = stream;
+    cameraVideoEl.play().catch(() => {});
+  } catch (e) {
+    alert("Brak dostępu do kamery");
+    closeCamera();
+  }
+}
+
+/* =========================
+   INIT
+   ========================= */
+window.addEventListener("load", () => {
+  applyProfileImage();
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  cameraContainerEl = document.getElementById("camera-container");
+  cameraVideoEl = document.getElementById("camera-view");
+
+  window.openCamera = openCamera;
+  window.closeCamera = closeCamera;
+
+  /* ===== EXTRA TOGGLE ===== */
+  const lo = document.getElementById("extra-toggle");
+  const content = document.getElementById("extra-content");
+  const arrow = document.getElementById("extra-arrow");
+
+  let open = false;
+
+  if (content) content.style.display = "none";
+
+  if (lo) {
+    lo.addEventListener("click", () => {
+      open = !open;
+      content.style.display = open ? "block" : "none";
+      if (arrow) {
+        arrow.src = open
+          ? "assets/icons/ab007_chevron_up.svg"
+          : "assets/icons/ab008_chevron_down.svg";
+      }
+    });
+  }
+
+  /* ===== CLOCK ===== */
+  const czasEl = document.querySelector(".czas");
+
+  function updateClock() {
+    const now = new Date();
+    const pad = (n) => (n < 10 ? "0" + n : n);
+    if (czasEl) {
+      czasEl.textContent = `Czas: ${pad(now.getHours())}:${pad(
+        now.getMinutes()
+      )}:${pad(now.getSeconds())}`;
+    }
+  }
+
+  if (czasEl) {
+    updateClock();
+    setInterval(updateClock, 1000);
+  }
+});

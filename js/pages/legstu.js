@@ -5,32 +5,57 @@ setTimeout(function () {
 }, 0);
 
 /* =========================
-   PROFILE IMAGE
+   PROFILE IMAGE (MOBILE FIX + B/W)
 ========================= */
 async function applyProfileImage() {
   try {
     const img = document.getElementById("profileImage");
     if (!img) return;
 
+    // CZARNO-BIAŁY FILTR
+    img.style.filter = "grayscale(100%) contrast(1.05)";
+    img.style.webkitFilter = "grayscale(100%) contrast(1.05)";
+
+    img.removeAttribute("src");
+
+    let loaded = false;
+
+    // =========================
+    // CACHE API
+    // =========================
     try {
       const cache = await caches.open("profile-images-v1");
       const cached = await cache.match("profile-image");
 
       if (cached) {
         const blob = await cached.blob();
-        img.src = URL.createObjectURL(blob);
-        img.style.opacity = "1";
-        return;
+
+        // FIX MOBILE: FileReader zamiast ObjectURL
+        const reader = new FileReader();
+        reader.onloadend = function () {
+          img.src = reader.result;
+          img.style.opacity = "1";
+        };
+        reader.readAsDataURL(blob);
+
+        loaded = true;
       }
     } catch (_) {}
 
+    if (loaded) return;
+
+    // =========================
+    // LOCALSTORAGE FALLBACK
+    // =========================
     const stored =
       localStorage.getItem("profileImage") ||
       localStorage.getItem("photo");
 
     if (stored) {
       img.src = stored;
-      img.onload = () => (img.style.opacity = "1");
+      img.onload = () => {
+        img.style.opacity = "1";
+      };
     } else {
       img.style.opacity = "0.3";
     }
@@ -75,28 +100,28 @@ function generateSchoolId() {
 function generateSchoolData() {
   const schools = [
     {
-      name: "Wyższa Szkoła Zarządzania w Radomiu",
-      address: "ul. 25 Czerwca 39, Radom",
-      phone: "+48 48 362 34 55",
-      director: "mgr Jan Malinowski",
+      name: "Wyższa Szkoła Biznesu w Radomiu",
+      address: "ul. Chrobrego 31, Radom",
+      phone: "+48 48 362 11 22",
+      director: "mgr Jan Kowalski",
     },
     {
-      name: "Akademia Nauk Stosowanych w Łomży",
-      address: "ul. Akademicka 14, Łomża",
-      phone: "+48 86 215 59 50",
-      director: "dr Anna Zielińska",
+      name: "Akademia Zawodowa w Płocku",
+      address: "ul. Kościuszki 14, Płock",
+      phone: "+48 24 366 88 99",
+      director: "dr Anna Mazur",
     },
     {
-      name: "Prywatna Szkoła Biznesu w Płocku",
-      address: "ul. Tumskiego 8, Płock",
-      phone: "+48 24 366 77 11",
-      director: "mgr Piotr Kaczmarek",
+      name: "Niepubliczna Szkoła Wyższa w Siedlcach",
+      address: "ul. Sokołowska 45, Siedlce",
+      phone: "+48 25 633 10 10",
+      director: "mgr Piotr Nowicki",
     },
     {
-      name: "Wyższa Szkoła Techniczno-Humanistyczna w Siedlcach",
-      address: "ul. Sokołowska 161, Siedlce",
-      phone: "+48 25 633 22 11",
-      director: "dr Marek Dąbrowski",
+      name: "Wyższa Szkoła Administracji w Łomży",
+      address: "ul. Akademicka 7, Łomża",
+      phone: "+48 86 215 44 33",
+      director: "dr Ewa Wróbel",
     },
   ];
 
@@ -104,7 +129,7 @@ function generateSchoolData() {
 }
 
 /* =========================
-   OSTATNIA AKTUALIZACJA (FIX jak w dowodzie)
+   OSTATNIA AKTUALIZACJA (FIX)
 ========================= */
 const UPDATE_KEY = "last_update_date_legstu";
 
@@ -137,7 +162,7 @@ function updateToToday() {
 }
 
 /* =========================
-   MAIN
+   INIT
 ========================= */
 document.addEventListener("DOMContentLoaded", () => {
   let data = {};
@@ -163,14 +188,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const cardNumber = data.schoolId || generateSchoolId();
   setText("display-albumNumber", cardNumber);
 
-  // uczelnia (słabsze szkoły)
+  // uczelnia
   const school = generateSchoolData();
   setText("display-uczelnia", data.schoolName || school.name);
 
   // zdjęcie
   applyProfileImage();
 
-  // toggle extra (bez zmian)
+  // toggle extra
   const lo = document.querySelector("#extra-toggle");
   const content = document.querySelector("#extra-content");
   const arrow = document.querySelector("#extra-arrow");
@@ -198,11 +223,11 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // CLOCK
+  // zegar
   updateClock();
   setInterval(updateClock, 1000);
 
-  // OSTATNIA AKTUALIZACJA
+  // ostatnia aktualizacja
   loadUpdateDate();
 
   const btn = document.getElementById("aktualizuj");

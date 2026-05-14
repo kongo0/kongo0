@@ -1,3 +1,4 @@
+const mobyData = JSON.parse(localStorage.getItem("mobywatel_data") || "{}");
 setTimeout(function () {
   try {
     window.scrollTo(0, 1);

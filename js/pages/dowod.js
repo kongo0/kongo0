@@ -23,40 +23,6 @@ function setImg(id, value) {
 }
 
 /* =========================
-   ID DATA (DOWÓD - OVERLAY)
-========================= */
-function generateIdData() {
-    const series =
-        getData("mdow_series", "md_idSeries");
-
-    const status =
-        document.getElementById("docStatus")?.textContent || "Wydany";
-
-    const issuer = "Urząd Miasta Warszawy";
-
-    const now = new Date();
-
-    const issueDate = new Date();
-    issueDate.setFullYear(now.getFullYear() - 1);
-
-    const expiryDate = new Date(issueDate);
-    expiryDate.setFullYear(issueDate.getFullYear() + 4);
-
-    const pad = (n) => (n < 10 ? "0" + n : n);
-
-    const format = (d) =>
-        `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()}`;
-
-    return {
-        series,
-        status,
-        issuer,
-        issueDate: format(issueDate),
-        expiryDate: format(expiryDate)
-    };
-}
-
-/* =========================
    CLOCK
 ========================= */
 function startClock() {
@@ -153,18 +119,16 @@ function closeCamera() {
 }
 
 /* =========================
-   INIT DATA
+   LOAD DATA (GŁÓWNY WIDOK)
 ========================= */
 function loadData() {
 
-    // GÓRA
     setText("display-name", getData("name", "name"));
     setText("display-surname", getData("surname", "surname"));
     setText("display-nationality", getData("nationality", "nationality"));
     setText("display-birthDate", getData("birthday", "birthDate"));
     setText("display-pesel", getData("pesel", "pesel"));
 
-    // DOWÓD
     setText("idSeriesMain", getData("mdow_series", "md_idSeries"));
     setText("expiryDateMain", getData("expiry_date", "md_expiryDate"));
     setText("issueDateMain", getData("issue_date", "md_issueDate"));
@@ -172,7 +136,6 @@ function loadData() {
     setText("fathernameMain", getData("father_name", "fathername"));
     setText("mothernameMain", getData("mother_name", "mothername"));
 
-    // DODATKOWE
     setText("lastName", getData("family_name", "lastName"));
     setText("gender", getData("sex", "gender"));
     setText("fatherSurname", getData("father_family_name", "fatherSurname"));
@@ -187,28 +150,40 @@ function loadData() {
 
     setText("registrationDate", getData("home_date", "registrationDate"));
 
-    // FOTO
     setImg("profileImage", getData("image", "profileImage"));
 }
 
 /* =========================
-   OVERLAY: DANE DOWODU
+   DANE DOWODU (OVERLAY FIX)
 ========================= */
 function openIdOverlay() {
-    const d = generateIdData();
 
-    const el = document.getElementById("idcard-data-overlay");
-    if (el) el.style.display = "block";
+    const series = getData("mdow_series", "md_idSeries");
 
-    setText("idSeries", d.series);
-    setText("docStatus", d.status);
-    setText("issuingAuthority", d.issuer);
-    setText("issueDate", d.issueDate);
-    setText("expiryDate", d.expiryDate);
+    const now = new Date();
+
+    const issueDate = new Date();
+    issueDate.setFullYear(now.getFullYear() - 1);
+
+    const expiryDate = new Date();
+    expiryDate.setFullYear(now.getFullYear() + 4);
+
+    const pad = (n) => (n < 10 ? "0" + n : n);
+
+    const format = (d) =>
+        `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()}`;
+
+    document.getElementById("idcard-data-overlay").style.display = "block";
+
+    setText("idSeries", series);
+    setText("docStatus", "Wydany");
+    setText("issuingAuthority", "Urząd Miasta Warszawy");
+    setText("issueDate", format(issueDate));
+    setText("expiryDate", format(expiryDate));
 }
 
 /* =========================
-   UI BIND
+   UI
 ========================= */
 function bindUI() {
 

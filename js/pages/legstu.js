@@ -2,117 +2,114 @@ setTimeout(function () {
   try {
     window.scrollTo(0, 1);
   } catch (e) {}
-});
+}, 0);
 
 /* =========================
-   BACKGROUND PRELOAD
+   PROFILE IMAGE (FIX)
 ========================= */
-
-(async function preloadBackgroundImage() {
-  try {
-    const bgUrl = "/assets/dowod/mid_background_main.webp";
-    const cache = await caches.open("mobywatel-v3");
-
-    const cached = await cache.match(bgUrl);
-    if (cached) return;
-
-    const img = new Image();
-    img.decoding = "async";
-    img.fetchPriority = "high";
-
-    img.onload = async function () {
-      try {
-        const response = await fetch(bgUrl);
-        if (response.ok) {
-          await cache.put(bgUrl, response);
-        }
-      } catch (_) {}
-    };
-
-    img.src = bgUrl;
-  } catch (_) {}
-})();
-
-/* =========================
-   PROFILE IMAGE (BEZ ZMIAN UI)
-========================= */
-
 async function applyProfileImage() {
   try {
     const img = document.getElementById("profileImage");
     if (!img) return;
 
+    // Cache API
+    try {
+      const cache = await caches.open("profile-images-v1");
+      const cached = await cache.match("profile-image");
+
+      if (cached) {
+        const blob = await cached.blob();
+        img.src = URL.createObjectURL(blob);
+        img.style.opacity = "1";
+        return;
+      }
+    } catch (_) {}
+
+    // localStorage fallback
     const stored =
       localStorage.getItem("profileImage") ||
       localStorage.getItem("photo");
 
     if (stored) {
       img.src = stored;
-      img.style.opacity = "1";
+      img.onload = () => {
+        img.style.opacity = "1";
+      };
+    } else {
+      img.style.opacity = "0.3";
     }
   } catch (_) {}
 }
 
 /* =========================
-   CAMERA (bez zmian)
+   CLOCK
 ========================= */
+function updateClock() {
+  const el = document.querySelector(".czas");
+  if (!el) return;
 
-let cameraStream = null;
-let cameraContainerEl = null;
-let cameraVideoEl = null;
+  const now = new Date();
+  const pad = (n) => (n < 10 ? "0" + n : n);
 
-function closeCamera() {
-  try {
-    document.body.classList.remove("camera-open");
-  } catch (_) {}
-
-  if (cameraStream) {
-    try {
-      cameraStream.getTracks().forEach(t => t.stop());
-    } catch (_) {}
-    cameraStream = null;
-  }
-
-  if (cameraVideoEl) cameraVideoEl.srcObject = null;
-
-  if (cameraContainerEl) cameraContainerEl.style.display = "none";
-}
-
-async function openCamera() {
-  cameraContainerEl = document.getElementById("camera-container");
-  cameraVideoEl = document.getElementById("camera-view");
-
-  if (!cameraContainerEl || !cameraVideoEl) {
-    window.location.href = "qr.html?scan=1";
-    return;
-  }
-
-  try {
-    cameraContainerEl.style.display = "block";
-    document.body.classList.add("camera-open");
-
-    cameraStream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: "environment" }
-    });
-
-    cameraVideoEl.srcObject = cameraStream;
-    await cameraVideoEl.play();
-  } catch (e) {
-    alert("Brak dostępu do kamery");
-    closeCamera();
-  }
+  el.textContent =
+    "Czas: " +
+    pad(now.getHours()) +
+    ":" +
+    pad(now.getMinutes()) +
+    ":" +
+    pad(now.getSeconds()) +
+    " " +
+    pad(now.getDate()) +
+    "." +
+    pad(now.getMonth() + 1) +
+    "." +
+    now.getFullYear();
 }
 
 /* =========================
-   INIT
+   GENERATORS (FIX)
 ========================= */
+function generateSchoolId() {
+  const year = new Date().getFullYear();
+  const a = Math.floor(1000 + Math.random() * 9000);
+  const b = Math.floor(10000 + Math.random() * 90000);
+  return year + "/" + a + "/" + b;
+}
 
+function generateSchoolData() {
+  const schools = [
+    {
+      name: "Uniwersytet Warszawski",
+      address: "ul. Krakowskie Przedmieście 26/28, Warszawa",
+      phone: "+48 22 55 20 000",
+      director: "prof. dr hab. Anna Nowak",
+    },
+    {
+      name: "Politechnika Warszawska",
+      address: "pl. Politechniki 1, Warszawa",
+      phone: "+48 22 234 50 00",
+      director: "prof. dr hab. inż. Marek Kowalski",
+    },
+    {
+      name: "SGGW w Warszawie",
+      address: "ul. Nowoursynowska 166, Warszawa",
+      phone: "+48 22 59 310 00",
+      director: "prof. dr hab. Ewa Wiśniewska",
+    },
+  ];
+
+  return schools[Math.floor(Math.random() * schools.length)];
+}
+
+/* =========================
+   MAIN LOAD
+========================= */
 document.addEventListener("DOMContentLoaded", () => {
   let data = {};
 
   try {
     data = JSON.parse(localStorage.getItem("mobywatel_data")) || {};
-  } catch (_) {}
+  } catch (e) {}
 
   const setText = (id, value) => {
     const el = document.getElementById(id);
@@ -120,116 +117,65 @@ document.addEventListener("DOMContentLoaded", () => {
     el.textContent = value && value !== "" ? value : "Brak danych";
   };
 
-  /* =========================
-     DANE STUDENCKIE (UI BEZ ZMIAN)
-  ========================= */
-
+  // =========================
+  // PODSTAWOWE DANE
+  // =========================
   setText("display-name", data.name);
   setText("display-surname", data.surname);
   setText("display-birthDate", data.birthday);
   setText("display-pesel", data.pesel);
   setText("display-dataWydania", data.issue_date);
 
-  /* uczelnia */
-  setText("display-uczelnia", data.schoolName);
+  // =========================
+  // NUMER LEGITYMACJI
+  // =========================
+  const cardNumber = data.schoolId || generateSchoolId();
+  setText("display-albumNumber", cardNumber);
 
-  /* album / index */
-  setText("display-albumNumber", generateStudentId(data.studentId));
+  // =========================
+  // UCZELNIA (FIX)
+  // =========================
+  const school = generateSchoolData();
+  setText("display-uczelnia", data.schoolName || school.name);
 
-  function generateStudentId(existing) {
-    if (existing) return existing;
+  // =========================
+  // ZDJĘCIE (FIX)
+  // =========================
+  applyProfileImage();
 
-    const year = new Date().getFullYear();
-    const a = Math.floor(1000 + Math.random() * 9000);
-    const b = Math.floor(10000 + Math.random() * 90000);
+  // =========================
+  // EXTRA TOGGLE (bez zmian UX)
+  // =========================
+  const lo = document.querySelector("#extra-toggle");
+  const content = document.querySelector("#extra-content");
+  const arrow = document.querySelector("#extra-arrow");
 
-    return `STU/${year}/${a}/${b}`;
+  let isOpen = false;
+  let contentinner = content ? content.innerHTML : "";
+
+  if (content) content.innerHTML = "";
+  if (arrow) arrow.src = "assets/icons/ab008_chevron_down.svg";
+  if (lo) lo.style.borderRadius = "12px";
+
+  if (lo) {
+    lo.addEventListener("click", function () {
+      isOpen = !isOpen;
+
+      if (isOpen) {
+        lo.style.borderRadius = "12px 12px 0px 0px";
+        if (content) content.innerHTML = contentinner;
+        if (arrow) arrow.src = "assets/icons/ab007_chevron_up.svg";
+      } else {
+        lo.style.borderRadius = "12px";
+        if (content) content.innerHTML = "";
+        if (arrow) arrow.src = "assets/icons/ab008_chevron_down.svg";
+      }
+    });
   }
 
-  /* =========================
-     CLOCK
-  ========================= */
-
-  function updateClock() {
-    const el = document.querySelector(".czas");
-    if (!el) return;
-
-    const now = new Date();
-    const pad = n => (n < 10 ? "0" + n : n);
-
-    el.textContent =
-      `Czas: ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())} ` +
-      `${pad(now.getDate())}.${pad(now.getMonth() + 1)}.${now.getFullYear()}`;
-  }
-
+  // =========================
+  // START CLOCK
+  // =========================
   updateClock();
   setInterval(updateClock, 1000);
-
-  /* =========================
-     OSTATNIA AKTUALIZACJA (IDENTYCZNIE JAK W DOWODZIE)
-  ========================= */
-
-  const UPDATE_KEY = "legstu_last_update_date";
-  const GENERATED_KEY = "legstu_generated_date";
-
-  const pad = n => (n < 10 ? "0" + n : n);
-
-  const formatDate = d =>
-    `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()}`;
-
-  function getGeneratedDate() {
-    let stored = localStorage.getItem(GENERATED_KEY);
-
-    if (!stored) {
-      const now = new Date();
-      localStorage.setItem(GENERATED_KEY, now.toISOString());
-      return now;
-    }
-
-    return new Date(stored);
-  }
-
-  function getInitialUpdateDate() {
-    const stored = localStorage.getItem(UPDATE_KEY);
-    return stored ? new Date(stored) : getGeneratedDate();
-  }
-
-  function setUpdateDate(date) {
-    localStorage.setItem(UPDATE_KEY, date.toISOString());
-
-    const formatted = formatDate(date);
-
-    const main = document.getElementById("sukadziwkakurwa");
-    if (main) main.textContent = formatted;
-  }
-
-  function loadUpdateDate() {
-    setUpdateDate(getInitialUpdateDate());
-  }
-
-  function updateToToday() {
-    const today = new Date();
-    setUpdateDate(today);
-
-    const n = document.getElementById("notification");
-    if (n) {
-      n.style.display = "block";
-      n.classList.add("show");
-
-      setTimeout(() => {
-        n.classList.remove("show");
-        n.style.display = "none";
-      }, 3000);
-    }
-  }
-
-  loadUpdateDate();
-
-  document
-    .getElementById("aktualizuj")
-    ?.addEventListener("click", updateToToday);
-
-  /* expose camera */
-  window.openCamera = openCamera;
-  window.closeCamera = closeCamera;
 });

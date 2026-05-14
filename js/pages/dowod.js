@@ -264,6 +264,7 @@ function bindExtraToggle() {
 ========================= */
 
 const UPDATE_KEY = "last_update_date";
+const GENERATED_KEY = "document_generated_date";
 
 function pad(n) {
     return n < 10 ? "0" + n : n;
@@ -273,35 +274,66 @@ function formatDate(d) {
     return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()}`;
 }
 
+/* DATA UTWORZENIA DOKUMENTU */
+function getGeneratedDate() {
+    let stored = localStorage.getItem(GENERATED_KEY);
+
+    if (!stored) {
+        const now = new Date();
+
+        localStorage.setItem(
+            GENERATED_KEY,
+            now.toISOString()
+        );
+
+        return now;
+    }
+
+    return new Date(stored);
+}
+
+/* PIERWSZA DATA AKTUALIZACJI */
 function getInitialUpdateDate() {
     const stored = localStorage.getItem(UPDATE_KEY);
-    if (stored) return new Date(stored);
 
-    const d = new Date();
-    d.setDate(d.getDate() - 2);
-    return d;
+    if (stored) {
+        return new Date(stored);
+    }
+
+    return getGeneratedDate();
 }
 
 function setUpdateDate(date) {
-    localStorage.setItem(UPDATE_KEY, date.toISOString());
+    localStorage.setItem(
+        UPDATE_KEY,
+        date.toISOString()
+    );
 
-    const text = formatDate(date);
+    const formatted = formatDate(date);
 
     const main = document.getElementById("sukadziwkakurwa");
     const modal = document.getElementById("sukadziwkakurwa_modal");
 
-    if (main) main.textContent = text;
-    if (modal) modal.textContent = text;
+    if (main) {
+        main.textContent = formatted;
+    }
+
+    if (modal) {
+        modal.textContent = formatted;
+    }
 }
 
 function loadUpdateDate() {
-    setUpdateDate(getInitialUpdateDate());
+    const date = getInitialUpdateDate();
+    setUpdateDate(date);
 }
 
 function updateToToday() {
-    setUpdateDate(new Date());
-}
+    const today = new Date();
+    setUpdateDate(today);
 
+    showToast("Dokument został zaktualizowany");
+}
 /* =========================
    UI BIND
 ========================= */

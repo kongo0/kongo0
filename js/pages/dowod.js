@@ -229,7 +229,7 @@ function openIdOverlay() {
 }
 
 /* =========================
-   TOGGLE DODATKOWE DANE
+   FIXED TOGGLE (DZIAŁA ZAWSZE)
 ========================= */
 function bindExtraToggle() {
     const toggle = document.getElementById("extra-toggle");
@@ -238,14 +238,24 @@ function bindExtraToggle() {
 
     if (!toggle || !content) return;
 
-    content.style.display = "none";
     let open = false;
+
+    content.style.overflow = "hidden";
+    content.style.maxHeight = "0px";
+    content.style.transition = "max-height 0.3s ease";
+
+    toggle.style.cursor = "pointer";
 
     toggle.addEventListener("click", () => {
         open = !open;
 
-        content.style.display = open ? "block" : "none";
-        if (arrow) arrow.style.transform = open ? "rotate(180deg)" : "rotate(0deg)";
+        if (open) {
+            content.style.maxHeight = content.scrollHeight + "px";
+            if (arrow) arrow.style.transform = "rotate(180deg)";
+        } else {
+            content.style.maxHeight = "0px";
+            if (arrow) arrow.style.transform = "rotate(0deg)";
+        }
     });
 }
 

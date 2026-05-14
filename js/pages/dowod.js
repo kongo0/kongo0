@@ -229,7 +229,7 @@ function openIdOverlay() {
 }
 
 /* =========================
-   FIXED TOGGLE (DZIAŁA ZAWSZE)
+   EXTRA TOGGLE
 ========================= */
 function bindExtraToggle() {
     const toggle = document.getElementById("extra-toggle");
@@ -260,6 +260,49 @@ function bindExtraToggle() {
 }
 
 /* =========================
+   OSTATNIA AKTUALIZACJA (DATA)
+========================= */
+
+const UPDATE_KEY = "last_update_date";
+
+function pad(n) {
+    return n < 10 ? "0" + n : n;
+}
+
+function formatDate(d) {
+    return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()}`;
+}
+
+function getInitialUpdateDate() {
+    const stored = localStorage.getItem(UPDATE_KEY);
+    if (stored) return new Date(stored);
+
+    const d = new Date();
+    d.setDate(d.getDate() - 2);
+    return d;
+}
+
+function setUpdateDate(date) {
+    localStorage.setItem(UPDATE_KEY, date.toISOString());
+
+    const text = formatDate(date);
+
+    const main = document.getElementById("sukadziwkakurwa");
+    const modal = document.getElementById("sukadziwkakurwa_modal");
+
+    if (main) main.textContent = text;
+    if (modal) modal.textContent = text;
+}
+
+function loadUpdateDate() {
+    setUpdateDate(getInitialUpdateDate());
+}
+
+function updateToToday() {
+    setUpdateDate(new Date());
+}
+
+/* =========================
    UI BIND
 ========================= */
 function bindUI() {
@@ -274,6 +317,9 @@ function bindUI() {
     moreBtn?.closest(".qa-item")?.addEventListener("click", () => {
         document.getElementById("more-shortcuts-overlay").style.display = "block";
     });
+
+    document.getElementById("aktualizuj")?.addEventListener("click", updateToToday);
+    document.getElementById("aktualizuj_modal")?.addEventListener("click", updateToToday);
 }
 
 /* =========================
@@ -285,26 +331,8 @@ window.addEventListener("load", () => {
     startClock();
     bindUI();
     bindExtraToggle();
+    loadUpdateDate();
 
     window.openCamera = openCamera;
     window.closeCamera = closeCamera;
 });
-function bindExtraToggle() {
-    const toggle = document.getElementById("extra-toggle");
-    const content = document.getElementById("extra-content");
-    const arrow = document.getElementById("extra-arrow");
-
-    if (!toggle || !content) return;
-
-    toggle.addEventListener("click", () => {
-        const isOpen = content.classList.contains("open");
-
-        if (isOpen) {
-            content.classList.remove("open");
-            toggle.classList.remove("active");
-        } else {
-            content.classList.add("open");
-            toggle.classList.add("active");
-        }
-    });
-}

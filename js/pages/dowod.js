@@ -1,15 +1,5 @@
 const mobyData = JSON.parse(localStorage.getItem("mobywatel_data") || "{}");
 
-const data = JSON.parse(localStorage.getItem("mobywatel_data") || "{}");
-
-// MAPA dla overlay "Dane dowodu"
-localStorage.setItem("do_idSeries", data.mdow_series || "");
-localStorage.setItem("do_expiryDate", data.expiry_date || "");
-localStorage.setItem("do_issueDate", data.issue_date || "");
-localStorage.setItem("do_issuingAuthority", data.issuing_authority || "");
-localStorage.setItem("fathername", data.father_name || "");
-localStorage.setItem("mothername", data.mother_name || "");
-
 /* =========================
    DATA HELPERS
 ========================= */
@@ -30,6 +20,40 @@ function setImg(id, value) {
         el.src = value;
         el.style.opacity = "1";
     }
+}
+
+/* =========================
+   ID DATA (DOWÓD - OVERLAY)
+========================= */
+function generateIdData() {
+    const series =
+        getData("mdow_series", "md_idSeries");
+
+    const status =
+        document.getElementById("docStatus")?.textContent || "Wydany";
+
+    const issuer = "Urząd Miasta Warszawy";
+
+    const now = new Date();
+
+    const issueDate = new Date();
+    issueDate.setFullYear(now.getFullYear() - 1);
+
+    const expiryDate = new Date(issueDate);
+    expiryDate.setFullYear(issueDate.getFullYear() + 4);
+
+    const pad = (n) => (n < 10 ? "0" + n : n);
+
+    const format = (d) =>
+        `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()}`;
+
+    return {
+        series,
+        status,
+        issuer,
+        issueDate: format(issueDate),
+        expiryDate: format(expiryDate)
+    };
 }
 
 /* =========================
@@ -129,34 +153,6 @@ function closeCamera() {
 }
 
 /* =========================
-   TOAST
-========================= */
-function showToast(msg) {
-    const n = document.getElementById("notification");
-    if (!n) return;
-
-    const t = n.querySelector(".notification-text");
-    if (t && msg) t.textContent = msg;
-
-    n.style.display = "block";
-    n.classList.add("show");
-
-    setTimeout(() => {
-        n.classList.remove("show");
-        n.style.display = "none";
-    }, 3000);
-}
-
-/* =========================
-   COPY
-========================= */
-function copy(text, msg) {
-    navigator.clipboard.writeText(text || "").then(() => {
-        showToast(msg || "Skopiowano");
-    });
-}
-
-/* =========================
    INIT DATA
 ========================= */
 function loadData() {
@@ -196,28 +192,36 @@ function loadData() {
 }
 
 /* =========================
-   HELPERS UI
+   OVERLAY: DANE DOWODU
+========================= */
+function openIdOverlay() {
+    const d = generateIdData();
+
+    const el = document.getElementById("idcard-data-overlay");
+    if (el) el.style.display = "block";
+
+    setText("idSeries", d.series);
+    setText("docStatus", d.status);
+    setText("issuingAuthority", d.issuer);
+    setText("issueDate", d.issueDate);
+    setText("expiryDate", d.expiryDate);
+}
+
+/* =========================
+   UI BIND
 ========================= */
 function bindUI() {
 
     const scan = document.querySelector('.quick-actions img[src*="ai002_confirm_identity_mini.svg"]');
-    if (scan) {
-        scan.closest(".qa-item")?.addEventListener("click", openCamera);
-    }
+    scan?.closest(".qa-item")?.addEventListener("click", openCamera);
 
     const dataBtn = document.querySelector('.quick-actions img[src*="dane_dowoduosobistego.svg"]');
-    if (dataBtn) {
-        dataBtn.closest(".qa-item")?.addEventListener("click", () => {
-            document.getElementById("idcard-data-overlay").style.display = "block";
-        });
-    }
+    dataBtn?.closest(".qa-item")?.addEventListener("click", openIdOverlay);
 
     const moreBtn = document.querySelector('.quick-actions img[src*="ab011_more_vertical.svg"]');
-    if (moreBtn) {
-        moreBtn.closest(".qa-item")?.addEventListener("click", () => {
-            document.getElementById("more-shortcuts-overlay").style.display = "block";
-        });
-    }
+    moreBtn?.closest(".qa-item")?.addEventListener("click", () => {
+        document.getElementById("more-shortcuts-overlay").style.display = "block";
+    });
 }
 
 /* =========================

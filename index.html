@@ -902,7 +902,7 @@
             };
 
             const params = [];
-            const allInputs = document.querySelectorAll('#dataGenerator input, #dataGenerator select');
+            const allInputs = form.querySelectorAll('input, select');
 
             for (const input of allInputs) {
                 const rawKey = input.name;
@@ -936,9 +936,7 @@
             // ==========================
             // ZAPIS DANYCH
             // ==========================
-const allInputs = document.querySelectorAll(
-    '#dataGenerator input, #dataGenerator select'
-);
+
 
 
             const dataObject = {};

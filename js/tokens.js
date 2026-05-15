@@ -14,5 +14,8 @@ const TOKENS = {
   
   "kongo0": {
     expires: null
+  },
+  "anton01": {
+    expires: null
   }
 };

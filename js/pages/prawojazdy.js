@@ -1,38 +1,32 @@
 /* =========================
-   HELPERY / GENERATOR
+   PRAWOJAZDY - GENERATOR (FIXED / DZIAŁA Z TWOIM SYSTEMEM)
    ========================= */
 
 function pad(n) {
   return n < 10 ? "0" + n : "" + n;
 }
 
-function randomFrom(arr) {
+function rand(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
 function generateDocumentNumber() {
-  const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  let l = "";
-  for (let i = 0; i < 3; i++) l += letters[Math.floor(Math.random() * letters.length)];
-
-  let n = "";
-  for (let i = 0; i < 7; i++) n += Math.floor(Math.random() * 10);
-
-  return l + n;
+  const L = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  let s = "";
+  for (let i = 0; i < 3; i++) s += L[Math.floor(Math.random() * L.length)];
+  for (let i = 0; i < 7; i++) s += Math.floor(Math.random() * 10);
+  return s;
 }
 
 function generateBlanketNumber() {
-  const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  let l = "";
-  for (let i = 0; i < 2; i++) l += letters[Math.floor(Math.random() * letters.length)];
-
-  let n = "";
-  for (let i = 0; i < 8; i++) n += Math.floor(Math.random() * 10);
-
-  return l + n;
+  const L = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  let s = "";
+  for (let i = 0; i < 2; i++) s += L[Math.floor(Math.random() * L.length)];
+  for (let i = 0; i < 8; i++) s += Math.floor(Math.random() * 10);
+  return s;
 }
 
-function generateIssuingAuthority() {
+function generateAuthority() {
   const list = [
     "Prezydent m.st. Warszawy",
     "Starosta Krakowski",
@@ -40,19 +34,17 @@ function generateIssuingAuthority() {
     "Starosta Poznański",
     "Prezydent Gdańska",
     "Starosta Katowicki",
-    "Prezydent Łodzi",
-    "Starosta Szczeciński"
+    "Prezydent Łodzi"
   ];
-  return randomFrom(list);
+  return rand(list);
 }
 
-function generateIssueDateFromBirth(birthStr) {
-  if (!birthStr) return null;
+function issueDateFromBirth(birth) {
+  if (!birth) return null;
 
-  const b = new Date(birthStr);
-  if (isNaN(b.getTime())) return null;
+  const d = new Date(birth);
+  if (isNaN(d.getTime())) return null;
 
-  const d = new Date(b);
   d.setFullYear(d.getFullYear() + 18);
   d.setDate(d.getDate() + 7);
 
@@ -60,37 +52,35 @@ function generateIssueDateFromBirth(birthStr) {
 }
 
 /* =========================
-   TWÓJ ORYGINALNY KOD (NIE ZMIENIAMY LOGIKI)
+   START
    ========================= */
 
-setTimeout(function () {
+setTimeout(() => {
   try {
     window.scrollTo(0, 1);
-  } catch (e) {}
+  } catch (_) {}
 }, 0);
 
 /* =========================
-   APPLY PROFILE IMAGE
+   PROFILE IMAGE
    ========================= */
 
-async function applyProfileImage() {
-  try {
-    var profileImage = document.getElementById("profileImage");
-    if (!profileImage) return;
+function applyProfileImage() {
+  const img = document.getElementById("profileImage");
+  if (!img) return;
 
-    var stored =
-      localStorage.getItem("profileImage") ||
-      localStorage.getItem("photo");
+  const stored =
+    localStorage.getItem("profileImage") ||
+    localStorage.getItem("photo");
 
-    if (stored) {
-      profileImage.src = stored;
-      profileImage.style.opacity = "1";
-    }
-  } catch (_) {}
+  if (stored) {
+    img.src = stored;
+    img.style.opacity = "1";
+  }
 }
 
 /* =========================
-   CAMERA (bez zmian)
+   CAMERA (zostawione jak było)
    ========================= */
 
 let cameraStream = null;
@@ -98,12 +88,10 @@ let cameraContainerEl = null;
 let cameraVideoEl = null;
 
 function closeCamera() {
-  try {
-    document.body.classList.remove("camera-open");
-  } catch (_) {}
+  document.body.classList.remove("camera-open");
 
   if (cameraStream) {
-    cameraStream.getTracks().forEach((t) => t.stop());
+    cameraStream.getTracks().forEach(t => t.stop());
     cameraStream = null;
   }
 }
@@ -135,51 +123,69 @@ async function openCamera() {
    INIT
    ========================= */
 
-window.addEventListener("load", function () {
-  applyProfileImage();
-});
+window.addEventListener("load", applyProfileImage);
 
 document.addEventListener("DOMContentLoaded", function () {
+
   cameraContainerEl = document.getElementById("camera-container");
   cameraVideoEl = document.getElementById("camera-view");
 
   /* =========================
-     GENERATOR DANYCH PRAWOJAZDY
+     🔥 GENERATOR DANYCH
      ========================= */
 
   try {
     const birth = localStorage.getItem("display-birthDate_prawojazdy");
 
-    const issueDate = generateIssueDateFromBirth(birth);
+    const issueDate = issueDateFromBirth(birth);
     const docNumber = generateDocumentNumber();
     const blankNumber = generateBlanketNumber();
-    const authority = generateIssuingAuthority();
+    const authority = generateAuthority();
 
-    if (issueDate) {
-      localStorage.setItem("display-issueDate_prawojazdy", issueDate);
+    // WAŻNE: KLUCZE MUSZĄ PASOWAĆ DO TWOJEGO setText()
+    localStorage.setItem(
+      "display-issueDate_prawojazdy",
+      issueDate || "BEZTERMINOWO"
+    );
+
+    localStorage.setItem(
+      "display-documentNumber_prawojazdy",
+      docNumber
+    );
+
+    localStorage.setItem(
+      "display-blanketNumber_prawojazdy",
+      blankNumber
+    );
+
+    localStorage.setItem(
+      "display-issuingAuthority_prawojazdy",
+      authority
+    );
+
+  } catch (e) {
+    console.log("generator error", e);
+  }
+
+  /* =========================
+     🔥 WYMUSZENIE RENDERU (KLUCZ)
+     ========================= */
+
+  try {
+    function set(id, val) {
+      const el = document.getElementById(id);
+      if (el && val) el.textContent = val;
     }
 
-    localStorage.setItem("display-documentNumber_prawojazdy", docNumber);
-    localStorage.setItem("display-blanketNumber_prawojazdy", blankNumber);
-    localStorage.setItem("display-issuingAuthority_prawojazdy", authority);
+    set("display-issueDate", localStorage.getItem("display-issueDate_prawojazdy"));
+    set("display-documentNumber", localStorage.getItem("display-documentNumber_prawojazdy"));
+    set("display-blanketNumber", localStorage.getItem("display-blanketNumber_prawojazdy"));
+    set("display-issuingAuthority", localStorage.getItem("display-issuingAuthority_prawojazdy"));
+
   } catch (e) {}
 
   /* =========================
-     RENDER DO HTML (setText działa z Twojego kodu)
-     ========================= */
-
-  function set(id, val) {
-    const el = document.getElementById(id);
-    if (el && val) el.textContent = val;
-  }
-
-  set("display-issueDate", localStorage.getItem("display-issueDate_prawojazdy"));
-  set("display-documentNumber", localStorage.getItem("display-documentNumber_prawojazdy"));
-  set("display-blanketNumber", localStorage.getItem("display-blanketNumber_prawojazdy"));
-  set("display-issuingAuthority", localStorage.getItem("display-issuingAuthority_prawojazdy"));
-
-  /* =========================
-     AKTUALIZUJ DATĘ
+     AKTUALIZACJA DATY
      ========================= */
 
   const btn = document.getElementById("aktualizuj");
@@ -188,7 +194,13 @@ document.addEventListener("DOMContentLoaded", function () {
   if (btn && el) {
     btn.addEventListener("click", () => {
       const d = new Date();
-      const now = `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()}`;
+      const now =
+        pad(d.getDate()) +
+        "." +
+        pad(d.getMonth() + 1) +
+        "." +
+        d.getFullYear();
+
       el.textContent = now;
       localStorage.setItem("lastUpdateDate", now);
     });

@@ -1,208 +1,128 @@
-/* =========================
-   PRAWOJAZDY - GENERATOR (FIXED / DZIAŁA Z TWOIM SYSTEMEM)
-   ========================= */
-
-function pad(n) {
-  return n < 10 ? "0" + n : "" + n;
-}
-
-function rand(arr) {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
-
-function generateDocumentNumber() {
-  const L = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  let s = "";
-  for (let i = 0; i < 3; i++) s += L[Math.floor(Math.random() * L.length)];
-  for (let i = 0; i < 7; i++) s += Math.floor(Math.random() * 10);
-  return s;
-}
-
-function generateBlanketNumber() {
-  const L = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  let s = "";
-  for (let i = 0; i < 2; i++) s += L[Math.floor(Math.random() * L.length)];
-  for (let i = 0; i < 8; i++) s += Math.floor(Math.random() * 10);
-  return s;
-}
-
-function generateAuthority() {
-  const list = [
-    "Prezydent m.st. Warszawy",
-    "Starosta Krakowski",
-    "Prezydent Wrocławia",
-    "Starosta Poznański",
-    "Prezydent Gdańska",
-    "Starosta Katowicki",
-    "Prezydent Łodzi"
-  ];
-  return rand(list);
-}
-
-function issueDateFromBirth(birth) {
-  if (!birth) return null;
-
-  const d = new Date(birth);
-  if (isNaN(d.getTime())) return null;
-
-  d.setFullYear(d.getFullYear() + 18);
-  d.setDate(d.getDate() + 7);
-
-  return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()}`;
-}
-
-/* =========================
-   START
-   ========================= */
-
-setTimeout(() => {
+// =====================
+// PROFILE IMAGE
+// =====================
+async function applyProfileImage() {
   try {
-    window.scrollTo(0, 1);
+    const profileImage = document.getElementById("profileImage");
+    if (!profileImage) return;
+
+    const userDataRaw = localStorage.getItem("userProfileData");
+
+    // 1. generator (NAJWAŻNIEJSZE)
+    if (userDataRaw) {
+      try {
+        const userData = JSON.parse(userDataRaw);
+        if (userData.photo) {
+          profileImage.src = userData.photo;
+          profileImage.style.opacity = "1";
+          return;
+        }
+      } catch (_) {}
+    }
+
+    // 2. fallback
+    const stored =
+      localStorage.getItem("profileImage") || localStorage.getItem("photo");
+
+    if (stored) {
+      profileImage.src = stored;
+      profileImage.style.opacity = "1";
+    }
   } catch (_) {}
-}, 0);
-
-/* =========================
-   PROFILE IMAGE
-   ========================= */
-
-function applyProfileImage() {
-  const img = document.getElementById("profileImage");
-  if (!img) return;
-
-  const stored =
-    localStorage.getItem("profileImage") ||
-    localStorage.getItem("photo");
-
-  if (stored) {
-    img.src = stored;
-    img.style.opacity = "1";
-  }
 }
 
-/* =========================
-   CAMERA (zostawione jak było)
-   ========================= */
+// =====================
+// HELPERS
+// =====================
+const up = (s) => (s ? String(s).toUpperCase() : s);
 
-let cameraStream = null;
-let cameraContainerEl = null;
-let cameraVideoEl = null;
+function formatDateDots(val) {
+  if (!val) return val;
+  const s = String(val).trim();
 
-function closeCamera() {
-  document.body.classList.remove("camera-open");
+  let m = s.match(/^(\d{4})[-./](\d{2})[-./](\d{2})$/);
+  if (m) return `${m[3]}.${m[2]}.${m[1]}`;
 
-  if (cameraStream) {
-    cameraStream.getTracks().forEach(t => t.stop());
-    cameraStream = null;
-  }
+  m = s.match(/^(\d{2})[-./](\d{2})[-./](\d{4})$/);
+  if (m) return `${m[1]}.${m[2]}.${m[3]}`;
+
+  return s.replace(/-/g, ".");
 }
 
-async function openCamera() {
-  cameraContainerEl = document.getElementById("camera-container");
-  cameraVideoEl = document.getElementById("camera-view");
+function setText(id, value, formatter) {
+  const el = document.getElementById(id);
+  if (!el || value == null || value === "") return;
 
-  if (!cameraContainerEl || !cameraVideoEl) {
-    window.location.href = "qr.html?scan=1";
+  const text = formatter ? formatter(value) : value;
+  if (!text) return;
+
+  el.textContent = text;
+}
+
+// =====================
+// MAIN DATA LOADING (FIX)
+// =====================
+function loadDriverData() {
+  let userData = null;
+
+  try {
+    userData = JSON.parse(localStorage.getItem("userProfileData") || "{}");
+  } catch (_) {}
+
+  // jeśli generator istnieje → PRIORYTET
+  if (userData && Object.keys(userData).length > 0) {
+    setText("display-name", userData.name, up);
+    setText("display-surname", userData.surname, up);
+    setText("display-pesel", userData.pesel, up);
+    setText("display-birthDate", userData.birthDate, formatDateDots);
+    setText("display-birthPlace", userData.placeOfBirth, up);
+    setText("display-nationality", userData.nationality, up);
+
+    // dodatkowe (jeśli są)
+    setText("display-category", userData.category || "B", up);
+    setText("display-documentNumber", userData.documentNumber, up);
+    setText("display-issuingAuthority", userData.issuingAuthority, up);
+
+    // WAŻNE: nie pokazuj "Brak danych"
     return;
   }
 
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: "environment" }
-    });
+  // fallback (jeśli brak generatora)
+  const map = [
+    ["display-name", "display-name_prawojazdy", up],
+    ["display-surname", "display-surname_prawojazdy", up],
+    ["display-pesel", "display-pesel_prawojazdy", up],
+    ["display-birthDate", "display-birthDate_prawojazdy", formatDateDots],
+    ["display-birthPlace", "display-birthPlace_prawojazdy", up],
+    ["display-category", "display-category_prawojazdy", up],
+    ["display-documentNumber", "display-documentNumber_prawojazdy", up],
+    ["display-issuingAuthority", "display-issuingAuthority_prawojazdy", up],
+  ];
 
-    cameraVideoEl.srcObject = stream;
-    cameraStream = stream;
-    cameraVideoEl.play().catch(() => {});
-  } catch (e) {
-    alert("Brak dostępu do kamery");
-    closeCamera();
-  }
+  map.forEach(([id, key, fmt]) => {
+    setText(id, localStorage.getItem(key), fmt);
+  });
 }
 
-/* =========================
-   INIT
-   ========================= */
+// =====================
+// INIT
+// =====================
+window.addEventListener("DOMContentLoaded", async () => {
+  await applyProfileImage();
+  loadDriverData();
 
-window.addEventListener("load", applyProfileImage);
-
-document.addEventListener("DOMContentLoaded", function () {
-
-  cameraContainerEl = document.getElementById("camera-container");
-  cameraVideoEl = document.getElementById("camera-view");
-
-  /* =========================
-     🔥 GENERATOR DANYCH
-     ========================= */
-
-  try {
-    const birth = localStorage.getItem("display-birthDate_prawojazdy");
-
-    const issueDate = issueDateFromBirth(birth);
-    const docNumber = generateDocumentNumber();
-    const blankNumber = generateBlanketNumber();
-    const authority = generateAuthority();
-
-    // WAŻNE: KLUCZE MUSZĄ PASOWAĆ DO TWOJEGO setText()
-    localStorage.setItem(
-      "display-issueDate_prawojazdy",
-      issueDate || "BEZTERMINOWO"
-    );
-
-    localStorage.setItem(
-      "display-documentNumber_prawojazdy",
-      docNumber
-    );
-
-    localStorage.setItem(
-      "display-blanketNumber_prawojazdy",
-      blankNumber
-    );
-
-    localStorage.setItem(
-      "display-issuingAuthority_prawojazdy",
-      authority
-    );
-
-  } catch (e) {
-    console.log("generator error", e);
-  }
-
-  /* =========================
-     🔥 WYMUSZENIE RENDERU (KLUCZ)
-     ========================= */
-
-  try {
-    function set(id, val) {
-      const el = document.getElementById(id);
-      if (el && val) el.textContent = val;
-    }
-
-    set("display-issueDate", localStorage.getItem("display-issueDate_prawojazdy"));
-    set("display-documentNumber", localStorage.getItem("display-documentNumber_prawojazdy"));
-    set("display-blanketNumber", localStorage.getItem("display-blanketNumber_prawojazdy"));
-    set("display-issuingAuthority", localStorage.getItem("display-issuingAuthority_prawojazdy"));
-
-  } catch (e) {}
-
-  /* =========================
-     AKTUALIZACJA DATY
-     ========================= */
-
-  const btn = document.getElementById("aktualizuj");
-  const el = document.getElementById("sukadziwkakurwa");
-
-  if (btn && el) {
-    btn.addEventListener("click", () => {
+  // clock (jeśli masz)
+  const czasEl = document.querySelector(".czas");
+  if (czasEl) {
+    setInterval(() => {
       const d = new Date();
-      const now =
-        pad(d.getDate()) +
-        "." +
-        pad(d.getMonth() + 1) +
-        "." +
-        d.getFullYear();
-
-      el.textContent = now;
-      localStorage.setItem("lastUpdateDate", now);
-    });
+      czasEl.textContent =
+        `Czas: ${String(d.getHours()).padStart(2, "0")}:` +
+        `${String(d.getMinutes()).padStart(2, "0")}:` +
+        `${String(d.getSeconds()).padStart(2, "0")} ` +
+        `${String(d.getDate()).padStart(2, "0")}.${String(
+          d.getMonth() + 1
+        ).padStart(2, "0")}.${d.getFullYear()}`;
+    }, 1000);
   }
 });

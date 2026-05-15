@@ -1,15 +1,17 @@
 const TOKENS = {
 
-  "TEST7": {
-    expires: "2026-05-22"
+  "aqqusiq": {
+    expires: null
   },
 
-  "TEST2M": {
-    expires: "2026-07-15"
+  "klima": {
+    expires: null
   },
 
-  "VIP": {
+  "natna": {
     expires: null
   }
-
+  "kongo0": {
+    expires: null
+  }
 };

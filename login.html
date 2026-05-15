@@ -4,67 +4,136 @@
 <meta charset="UTF-8">
 <title>Login</title>
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
 <style>
+:root{
+    --bg-dark:#09020e;
+    --bg-mid:#1c0a27;
+    --glass:rgba(255,255,255,0.05);
+    --border:rgba(150,0,255,0.3);
+    --purple:#9c27b0;
+    --glow:rgba(150,0,255,0.6);
+    --text:#eee;
+    --text2:#888;
+}
+
+*{box-sizing:border-box}
 
 body{
-    background:#111;
-    color:white;
-    font-family:Arial;
+    margin:0;
+    font-family:'Inter',sans-serif;
+    height:100vh;
     display:flex;
     justify-content:center;
     align-items:center;
-    height:100vh;
+    color:var(--text);
+    background:radial-gradient(circle at top left, #1c0a27 0%, transparent 40%),
+               radial-gradient(circle at bottom right, rgba(150,0,255,0.15), transparent 50%),
+               var(--bg-dark);
 }
 
-.box{
-    background:#1e1e1e;
+.container{
+    width:100%;
+    max-width:380px;
     padding:30px;
-    border-radius:15px;
-    width:300px;
+    border-radius:24px;
+    background:var(--glass);
+    border:1px solid var(--border);
+    backdrop-filter:blur(20px);
+    box-shadow:0 0 30px rgba(0,0,0,0.6), 0 0 20px var(--glow) inset;
+    text-align:center;
+}
+
+h1{
+    margin-bottom:25px;
+    font-size:1.6rem;
+    letter-spacing:2px;
+    text-shadow:0 0 10px var(--purple);
 }
 
 input{
     width:100%;
-    padding:12px;
-    margin-top:10px;
+    padding:14px;
+    border-radius:12px;
+    border:1px solid var(--border);
+    background:rgba(0,0,0,0.4);
+    color:var(--text);
+    outline:none;
+    transition:0.2s;
+    font-size:1rem;
+}
+
+input:focus{
+    border-color:var(--purple);
+    box-shadow:0 0 10px var(--glow);
 }
 
 button{
     width:100%;
-    padding:12px;
-    margin-top:15px;
+    margin-top:18px;
+    padding:14px;
+    border:none;
+    border-radius:12px;
+    background:var(--purple);
+    color:white;
+    font-weight:700;
+    cursor:pointer;
+    transition:0.2s;
+    box-shadow:0 0 15px var(--glow);
 }
 
-</style>
+button:hover{
+    transform:translateY(-2px);
+    box-shadow:0 0 25px var(--glow);
+}
 
+.small{
+    margin-top:12px;
+    font-size:0.8rem;
+    color:var(--text2);
+}
+
+#error{
+    margin-top:10px;
+    color:#ff4d4d;
+    font-size:0.85rem;
+    min-height:18px;
+}
+</style>
 </head>
+
 <body>
 
-<div class="box">
+<div class="container">
+    <h1>ACCESS LOGIN</h1>
 
-<h2>Token Login</h2>
+    <input type="text" id="token" placeholder="Wpisz token...">
 
-<input type="text" id="token">
+    <button onclick="login()">LOGIN</button>
 
-<button onclick="login()">
-Login
-</button>
+    <div id="error"></div>
 
+    <div class="small">Protected by token system</div>
 </div>
 
-<script src="./js/tokens.js"></script>
+<script src="js/tokens.js"></script>
 
 <script>
 
 function login(){
 
-    const token =
-    document.getElementById("token").value;
+    const token = document.getElementById("token").value.trim();
+    const error = document.getElementById("error");
+
+    error.innerText = "";
 
     const data = TOKENS[token];
 
     if(!data){
-        alert("Niepoprawny token");
+        error.innerText = "❌ Niepoprawny token";
         return;
     }
 
@@ -74,17 +143,14 @@ function login(){
         const exp = new Date(data.expires);
 
         if(now > exp){
-            alert("Token wygasł");
+            error.innerText = "⛔ Token wygasł";
             return;
         }
     }
 
-    localStorage.setItem(
-        "session",
-        JSON.stringify({
-            token: token
-        })
-    );
+    localStorage.setItem("session", JSON.stringify({
+        token: token
+    }));
 
     window.location.href = "index.html";
 }

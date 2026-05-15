@@ -177,50 +177,18 @@ async function applyProfileImage() {
 }
 
 /* =========================
-   OSTATNIA AKTUALIZACJA (jak w dowód.js)
+   OSTATNIA AKTUALIZACJA (DATA)
 ========================= */
 
 const UPDATE_KEY = "last_update_date";
+const GENERATED_KEY = "document_generated_date";
 
-function pad2(n) {
+function pad(n) {
     return n < 10 ? "0" + n : n;
 }
 
-function nowStr() {
-    const d = new Date();
-    return `${pad2(d.getDate())}.${pad2(d.getMonth() + 1)}.${d.getFullYear()}`;
-}
-
-function loadUpdateDate() {
-    const saved = localStorage.getItem(UPDATE_KEY);
-    const el = document.getElementById("sukadziwkakurwa");
-
-    if (el) {
-        el.textContent = saved || nowStr();
-    }
-}
-
-function updateToToday() {
-    const v = nowStr();
-
-    localStorage.setItem(UPDATE_KEY, v);
-
-    const main = document.getElementById("sukadziwkakurwa");
-    if (main) main.textContent = v;
-
-    const modal = document.getElementById("sukadziwkakurwa_modal");
-    if (modal) modal.textContent = v;
-
-    const n = document.getElementById("notification");
-    if (n) {
-        n.style.display = "block";
-        n.classList.add("show");
-
-        setTimeout(() => {
-            n.classList.remove("show");
-            n.style.display = "none";
-        }, 3000);
-    }
+function formatDate(d) {
+    return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()}`;
 }
 
 /* =========================

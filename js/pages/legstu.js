@@ -47,7 +47,14 @@ async function applyProfileImage() {
     // =========================
     // LOCALSTORAGE FALLBACK
     // =========================
+    let data = {};
+
+    try {
+      data = JSON.parse(localStorage.getItem("mobywatel_data")) || {};
+    } catch (_) {}
+
     const stored =
+      data.image ||
       localStorage.getItem("profileImage") ||
       localStorage.getItem("photo");
 

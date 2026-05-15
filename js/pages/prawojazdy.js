@@ -1,5 +1,5 @@
 /* =========================
-   GENERATOR DANYCH PRAWOJAZDY (FAKE / SZKOLNY)
+   HELPERY / GENERATOR
    ========================= */
 
 function pad(n) {
@@ -10,63 +10,57 @@ function randomFrom(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
-function randomInt(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-/* --- NUMERY --- */
-
 function generateDocumentNumber() {
-  // styl: ABC1234567
   const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   let l = "";
   for (let i = 0; i < 3; i++) l += letters[Math.floor(Math.random() * letters.length)];
+
   let n = "";
   for (let i = 0; i < 7; i++) n += Math.floor(Math.random() * 10);
-  return `${l}${n}`;
+
+  return l + n;
 }
 
 function generateBlanketNumber() {
-  // styl blankietu: 2 litery + 8 cyfr
   const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   let l = "";
   for (let i = 0; i < 2; i++) l += letters[Math.floor(Math.random() * letters.length)];
+
   let n = "";
   for (let i = 0; i < 8; i++) n += Math.floor(Math.random() * 10);
-  return `${l}${n}`;
+
+  return l + n;
 }
 
 function generateIssuingAuthority() {
-  const offices = [
+  const list = [
     "Prezydent m.st. Warszawy",
     "Starosta Krakowski",
     "Prezydent Wrocławia",
     "Starosta Poznański",
     "Prezydent Gdańska",
-    "Starosta Łódzki Wschodni",
-    "Prezydent Szczecina",
-    "Starosta Katowicki"
+    "Starosta Katowicki",
+    "Prezydent Łodzi",
+    "Starosta Szczeciński"
   ];
-  return randomFrom(offices);
+  return randomFrom(list);
 }
 
-/* --- DATA WYDANIA: 18 LAT + 7 DNI --- */
+function generateIssueDateFromBirth(birthStr) {
+  if (!birthStr) return null;
 
-function generateIssueDate(birthDateStr) {
-  if (!birthDateStr) return null;
+  const b = new Date(birthStr);
+  if (isNaN(b.getTime())) return null;
 
-  const birth = new Date(birthDateStr);
-  if (isNaN(birth.getTime())) return null;
+  const d = new Date(b);
+  d.setFullYear(d.getFullYear() + 18);
+  d.setDate(d.getDate() + 7);
 
-  const issue = new Date(birth);
-  issue.setFullYear(issue.getFullYear() + 18);
-  issue.setDate(issue.getDate() + 7);
-
-  return `${pad(issue.getDate())}.${pad(issue.getMonth() + 1)}.${issue.getFullYear()}`;
+  return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()}`;
 }
 
 /* =========================
-   RESZTA ORYGINALNEGO KODU
+   TWÓJ ORYGINALNY KOD (NIE ZMIENIAMY LOGIKI)
    ========================= */
 
 setTimeout(function () {
@@ -76,7 +70,7 @@ setTimeout(function () {
 }, 0);
 
 /* =========================
-   PROFILE IMAGE
+   APPLY PROFILE IMAGE
    ========================= */
 
 async function applyProfileImage() {
@@ -85,7 +79,8 @@ async function applyProfileImage() {
     if (!profileImage) return;
 
     var stored =
-      localStorage.getItem("profileImage") || localStorage.getItem("photo");
+      localStorage.getItem("profileImage") ||
+      localStorage.getItem("photo");
 
     if (stored) {
       profileImage.src = stored;
@@ -137,66 +132,64 @@ async function openCamera() {
 }
 
 /* =========================
-   MAIN LOGIKA WSTRZYKIWANIA DANYCH
+   INIT
    ========================= */
 
 window.addEventListener("load", function () {
   applyProfileImage();
 });
 
-/* =========================
-   DOM READY
-   ========================= */
-
 document.addEventListener("DOMContentLoaded", function () {
   cameraContainerEl = document.getElementById("camera-container");
   cameraVideoEl = document.getElementById("camera-view");
 
-  /* ====== DOM FILL ====== */
+  /* =========================
+     GENERATOR DANYCH PRAWOJAZDY
+     ========================= */
 
-  const birthDateRaw = localStorage.getItem("display-birthDate_prawojazdy");
+  try {
+    const birth = localStorage.getItem("display-birthDate_prawojazdy");
 
-  const issueDate = generateIssueDate(birthDateRaw);
-  const documentNumber = generateDocumentNumber();
-  const blanketNumber = generateBlanketNumber();
-  const issuingAuthority = generateIssuingAuthority();
+    const issueDate = generateIssueDateFromBirth(birth);
+    const docNumber = generateDocumentNumber();
+    const blankNumber = generateBlanketNumber();
+    const authority = generateIssuingAuthority();
 
-  /* Data wydania */
-  if (issueDate) {
-    localStorage.setItem("display-issueDate_prawojazdy", issueDate);
-  }
+    if (issueDate) {
+      localStorage.setItem("display-issueDate_prawojazdy", issueDate);
+    }
 
-  /* Numer dokumentu */
-  localStorage.setItem("display-documentNumber_prawojazdy", documentNumber);
+    localStorage.setItem("display-documentNumber_prawojazdy", docNumber);
+    localStorage.setItem("display-blanketNumber_prawojazdy", blankNumber);
+    localStorage.setItem("display-issuingAuthority_prawojazdy", authority);
+  } catch (e) {}
 
-  /* Blankiet */
-  localStorage.setItem("display-blanketNumber_prawojazdy", blanketNumber);
-
-  /* Organ */
-  localStorage.setItem("display-issuingAuthority_prawojazdy", issuingAuthority);
-
-  /* ====== render do HTML ====== */
+  /* =========================
+     RENDER DO HTML (setText działa z Twojego kodu)
+     ========================= */
 
   function set(id, val) {
     const el = document.getElementById(id);
     if (el && val) el.textContent = val;
   }
 
-  set("display-issueDate", issueDate);
-  set("display-documentNumber", documentNumber);
-  set("display-blanketNumber", blanketNumber);
-  set("display-issuingAuthority", issuingAuthority);
+  set("display-issueDate", localStorage.getItem("display-issueDate_prawojazdy"));
+  set("display-documentNumber", localStorage.getItem("display-documentNumber_prawojazdy"));
+  set("display-blanketNumber", localStorage.getItem("display-blanketNumber_prawojazdy"));
+  set("display-issuingAuthority", localStorage.getItem("display-issuingAuthority_prawojazdy"));
 
-  /* ====== kopiowanie (z twojego systemu) ====== */
+  /* =========================
+     AKTUALIZUJ DATĘ
+     ========================= */
 
   const btn = document.getElementById("aktualizuj");
-  if (btn) {
+  const el = document.getElementById("sukadziwkakurwa");
+
+  if (btn && el) {
     btn.addEventListener("click", () => {
       const d = new Date();
       const now = `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()}`;
-      const el = document.getElementById("sukadziwkakurwa");
-
-      if (el) el.textContent = now;
+      el.textContent = now;
       localStorage.setItem("lastUpdateDate", now);
     });
   }

@@ -1,40 +1,42 @@
-const session =
-JSON.parse(localStorage.getItem("session"));
+console.log("AUTH LOADED");
 
-if(!session){
+// jeśli nie ma tokens.js → blokada
+if (typeof TOKENS === "undefined") {
+    console.error("TOKENS is not loaded!");
+}
 
+// pobranie sesji
+const session = JSON.parse(localStorage.getItem("session"));
+
+// brak logowania → login
+if (!session || !session.token) {
     window.location.href = "login.html";
 }
 
-else{
+// sprawdzanie tokena
+else {
+    const tokenData = TOKENS?.[session.token];
 
-    const tokenData =
-    TOKENS[session.token];
-
-    if(!tokenData){
-
+    // token nie istnieje
+    if (!tokenData) {
         localStorage.removeItem("session");
-
         window.location.href = "login.html";
     }
 
-    if(tokenData.expires){
-
+    // sprawdzanie daty wygaśnięcia
+    if (tokenData?.expires) {
         const now = new Date();
         const exp = new Date(tokenData.expires);
 
-        if(now > exp){
-
+        if (now > exp) {
             localStorage.removeItem("session");
-
             window.location.href = "login.html";
         }
     }
 }
 
-function logout(){
-
+// logout globalny
+function logout() {
     localStorage.removeItem("session");
-
     window.location.href = "login.html";
 }

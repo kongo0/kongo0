@@ -16,7 +16,7 @@ function setText(id, value) {
     const el = document.getElementById(id);
     if (!el) return;
 
-    if (value === null || value === undefined || value === "") {
+    if (!value || value === "Brak danych") {
         el.textContent = "Brak danych";
         return;
     }
@@ -45,16 +45,17 @@ function formatDate(d) {
 }
 
 /* =========================
-   DRIVER LICENSE GENERATOR
+   GENERATOR DANYCH
 ========================= */
 
 function generatePrawoJazdyData() {
-    const birthDateRaw = getData("birthDate", "birthday");
+    const birthRaw =
+        getData("birthDate", "birthday") ||
+        getData("birth_date");
 
-    let birthDate = birthDateRaw ? new Date(birthDateRaw) : null;
+    let birthDate = new Date(birthRaw);
 
-    // jeśli brak daty → fallback
-    if (!birthDate || isNaN(birthDate)) {
+    if (!birthRaw || isNaN(birthDate)) {
         birthDate = new Date();
     }
 
@@ -63,52 +64,42 @@ function generatePrawoJazdyData() {
     issueDate.setFullYear(issueDate.getFullYear() + 18);
     issueDate.setDate(issueDate.getDate() + 7);
 
-    // ważność 15 lat (realistycznie)
     const expiryDate = new Date(issueDate);
     expiryDate.setFullYear(expiryDate.getFullYear() + 15);
-
-    // FAKE ALE REALISTYCZNE DANE
-    const docNumber =
-        "PL-" +
-        Math.floor(10000000 + Math.random() * 90000000);
-
-    const blankietNumber =
-        "B" +
-        Math.floor(100000000 + Math.random() * 900000000);
-
-    const issuingAuthority =
-        "Prezydent m.st. Warszawy";
 
     return {
         issueDate: formatDate(issueDate),
         expiryDate: formatDate(expiryDate),
-        documentNumber: docNumber,
-        blankietNumber: blankietNumber,
-        issuingAuthority: issuingAuthority,
-        status: "Wydany",
-        category: "B"
+        documentNumber:
+            "PL-" + Math.floor(10000000 + Math.random() * 90000000),
+        blankietNumber:
+            "B" + Math.floor(100000000 + Math.random() * 900000000),
+        issuingAuthority: "Prezydent m.st. Warszawy"
     };
 }
 
 /* =========================
-   LOAD DATA (NAJWAŻNIEJSZE)
+   LOAD DATA
 ========================= */
 
 function loadData() {
-    // dane osobowe
+    // ===== DANE OSOBOWE =====
     setText("display-name", getData("name", "name"));
     setText("display-surname", getData("surname", "surname"));
+
+    // 🔥 FIX: DATA + MIEJSCE
     setText("display-birthDate", getData("birthDate", "birthday"));
     setText("display-birthPlace", getData("birthPlace", "placeOfBirth"));
-    setText("display-pesel", getData("pesel", "pesel"));
 
-    // KATEGORIA ZAWSZE B
-    setText("category", "B");
+    setText("display-pesel", getData("pesel", "pesel"));
 
     // zdjęcie
     setImg("profileImage", getData("image", "profileImage"));
 
-    // generowane dane prawa jazdy
+    // kategoria zawsze B
+    setText("category", "B");
+
+    // ===== GENEROWANE DANE =====
     const d = generatePrawoJazdyData();
 
     setText("display-issueDate", d.issueDate);
@@ -117,7 +108,6 @@ function loadData() {
     setText("display-blanketNumber", d.blankietNumber);
     setText("display-issuingAuthority", d.issuingAuthority);
 
-    // status
     const statusEl = document.getElementById("blanketStatus");
     if (statusEl) {
         statusEl.innerHTML =
@@ -145,14 +135,16 @@ function startClock() {
 }
 
 /* =========================
-   PROFILE IMAGE (CACHE + LOCALSTORAGE)
+   PROFILE IMAGE
 ========================= */
 
 async function applyProfileImage() {
     const img = document.getElementById("profileImage");
     if (!img) return;
 
-    const stored = localStorage.getItem("profileImage") || localStorage.getItem("photo");
+    const stored =
+        localStorage.getItem("profileImage") ||
+        localStorage.getItem("photo");
 
     if (stored) {
         img.src = stored;
@@ -161,18 +153,65 @@ async function applyProfileImage() {
 }
 
 /* =========================
-   CAMERA (UPROSZCZONE)
+   OSTATNIA AKTUALIZACJA (FIX = jak w dowod.js)
+========================= */
+
+const UPDATE_KEY = "last_update_date";
+
+function pad2(n) {
+    return n < 10 ? "0" + n : n;
+}
+
+function nowStr() {
+    const d = new Date();
+    return `${pad2(d.getDate())}.${pad2(d.getMonth() + 1)}.${d.getFullYear()}`;
+}
+
+function loadUpdateDate() {
+    const saved = localStorage.getItem(UPDATE_KEY);
+
+    const el = document.getElementById("sukadziwkakurwa");
+    if (el) {
+        el.textContent = saved || nowStr();
+    }
+}
+
+function updateToToday() {
+    const v = nowStr();
+
+    localStorage.setItem(UPDATE_KEY, v);
+
+    const main = document.getElementById("sukadziwkakurwa");
+    if (main) main.textContent = v;
+
+    const modal = document.getElementById("sukadziwkakurwa_modal");
+    if (modal) modal.textContent = v;
+
+    const n = document.getElementById("notification");
+    if (n) {
+        n.style.display = "block";
+        n.classList.add("show");
+
+        setTimeout(() => {
+            n.classList.remove("show");
+            n.style.display = "none";
+        }, 3000);
+    }
+}
+
+/* =========================
+   CAMERA
 ========================= */
 
 let stream = null;
 
 async function openCamera() {
-    const container = document.getElementById("camera-container");
-    const video = document.getElementById("camera-view");
+    const c = document.getElementById("camera-container");
+    const v = document.getElementById("camera-view");
 
-    if (!container || !video) return;
+    if (!c || !v) return;
 
-    container.style.display = "block";
+    c.style.display = "block";
     document.body.classList.add("camera-open");
 
     try {
@@ -180,8 +219,8 @@ async function openCamera() {
             video: { facingMode: "environment" }
         });
 
-        video.srcObject = stream;
-        await video.play();
+        v.srcObject = stream;
+        await v.play();
     } catch (e) {
         alert("Brak dostępu do kamery");
         closeCamera();
@@ -196,11 +235,11 @@ function closeCamera() {
         stream = null;
     }
 
-    const container = document.getElementById("camera-container");
-    const video = document.getElementById("camera-view");
+    const v = document.getElementById("camera-view");
+    const c = document.getElementById("camera-container");
 
-    if (video) video.srcObject = null;
-    if (container) container.style.display = "none";
+    if (v) v.srcObject = null;
+    if (c) c.style.display = "none";
 }
 
 /* =========================
@@ -212,6 +251,12 @@ function bindUI() {
         .querySelector('.quick-actions img[src*="ai002_confirm_identity_mini.svg"]')
         ?.closest(".qa-item")
         ?.addEventListener("click", openCamera);
+
+    document.getElementById("aktualizuj")
+        ?.addEventListener("click", updateToToday);
+
+    document.getElementById("aktualizuj_modal")
+        ?.addEventListener("click", updateToToday);
 }
 
 /* =========================
@@ -223,6 +268,7 @@ window.addEventListener("load", () => {
     applyProfileImage();
     startClock();
     bindUI();
+    loadUpdateDate();
 
     window.openCamera = openCamera;
     window.closeCamera = closeCamera;

@@ -10,7 +10,7 @@ const TOKENS = {
 
   "natna": {
     expires: null
-  }
+  }.
   "kongo0": {
     expires: null
   }

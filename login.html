@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<title>Login</title>
+
+<style>
+
+body{
+    background:#111;
+    color:white;
+    font-family:Arial;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+}
+
+.box{
+    background:#1e1e1e;
+    padding:30px;
+    border-radius:15px;
+    width:300px;
+}
+
+input{
+    width:100%;
+    padding:12px;
+    margin-top:10px;
+}
+
+button{
+    width:100%;
+    padding:12px;
+    margin-top:15px;
+}
+
+</style>
+
+</head>
+<body>
+
+<div class="box">
+
+<h2>Token Login</h2>
+
+<input type="text" id="token">
+
+<button onclick="login()">
+Login
+</button>
+
+</div>
+
+<script src="tokens.js"></script>
+
+<script>
+
+function login(){
+
+    const token =
+    document.getElementById("token").value;
+
+    const data = TOKENS[token];
+
+    if(!data){
+        alert("Niepoprawny token");
+        return;
+    }
+
+    if(data.expires){
+
+        const now = new Date();
+        const exp = new Date(data.expires);
+
+        if(now > exp){
+            alert("Token wygasł");
+            return;
+        }
+    }
+
+    localStorage.setItem(
+        "session",
+        JSON.stringify({
+            token: token
+        })
+    );
+
+    window.location.href = "/main.html";
+}
+
+</script>
+
+</body>
+</html>

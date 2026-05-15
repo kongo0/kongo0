@@ -1,8 +1,18 @@
-// =====================
-// FORMAT DATY
-// =====================
+function safeJSON(key) {
+  try {
+    return JSON.parse(localStorage.getItem(key));
+  } catch (_) {
+    return null;
+  }
+}
+
+function up(v) {
+  return v ? String(v).toUpperCase() : v;
+}
+
 function formatDateDots(val) {
   if (!val) return val;
+
   const s = String(val).trim();
 
   let m = s.match(/^(\d{4})[-./](\d{2})[-./](\d{2})$/);
@@ -15,77 +25,67 @@ function formatDateDots(val) {
 }
 
 // =====================
-// UPPERCASE
+// SAFE SET (NIE NADPISUJE “Brak danych”)
 // =====================
-function up(v) {
-  return v ? String(v).toUpperCase() : v;
-}
-
-// =====================
-// SET TEXT SAFE
-// =====================
-function setText(id, value, formatter) {
+function setText(id, value, formatter, onlyIfEmpty = true) {
   const el = document.getElementById(id);
   if (!el) return;
+
   if (value == null || value === "") return;
+
+  if (onlyIfEmpty && el.textContent && el.textContent !== "Brak danych") return;
 
   el.textContent = formatter ? formatter(value) : value;
 }
 
 // =====================
-// LOAD DATA (JAK W INNYCH DOKUMENTACH)
+// MAIN LOAD (NAPRAWIONE)
 // =====================
-function loadData() {
-  let data = {};
+function loadDriverData() {
+  const data = safeJSON("userProfileData") || {};
 
-  try {
-    data = JSON.parse(localStorage.getItem("userProfileData")) || {};
-  } catch (_) {}
+  console.log("[PJ] userProfileData:", data);
 
-  console.log("[PrawoJazdy] data:", data);
-
-  // =====================
-  // IMIĘ
-  // =====================
+  // ====== DANE Z GENERATORA (PRIORYTET) ======
   setText("display-name", data.name, up);
-
-  // =====================
-  // NAZWISKO
-  // =====================
   setText("display-surname", data.surname, up);
-
-  // =====================
-  // PESEL
-  // =====================
   setText("display-pesel", data.pesel, up);
-
-  // =====================
-  // DATA URODZENIA
-  // =====================
   setText("display-birthDate", data.birthDate, formatDateDots);
-
-  // =====================
-  // MIEJSCE URODZENIA
-  // =====================
   setText("display-birthPlace", data.placeOfBirth, up);
 
-  // =====================
-  // 🔥 KATEGORIA ZAWSZE B
-  // =====================
-  const categoryEl = document.getElementById("category");
-  if (categoryEl) categoryEl.textContent = "B";
+  // ====== KATEGORIA ZAWSZE B ======
+  const cat = document.getElementById("category");
+  if (cat) cat.textContent = "B";
 
-  // =====================
-  // ZDJĘCIE
-  // =====================
+  // ====== ZDJĘCIE ======
   const img = document.getElementById("profileImage");
   if (img && data.photo) {
     img.src = data.photo;
     img.style.opacity = "1";
   }
+
+  // =====================
+  // RESZTA TWOJEGO SYSTEMU (BLANKIET ITD)
+  // NIE DOTYKAMY — ALE DOŁADOWUJEMY TYLKO JEŚLI BRAK
+  // =====================
+
+  const extraMap = [
+    ["display-documentNumber", "display-documentNumber_prawojazdy", up],
+    ["display-blanketNumber", "display-blanketNumber_prawojazdy", up],
+    ["display-issuingAuthority", "display-issuingAuthority_prawojazdy", up],
+    ["display-issueDate", "display-issueDate_prawojazdy", formatDateDots],
+    ["display-expiryDate", "display-expiryDate_prawojazdy", formatDateDots],
+  ];
+
+  extraMap.forEach(([id, key, fmt]) => {
+    setText(id, localStorage.getItem(key), fmt, true);
+  });
+
+  // status blankietu fallback
+  const status = document.getElementById("display-blanketStatus");
+  if (status && status.textContent.trim() === "Brak danych") {
+    status.textContent = "WYDANY";
+  }
 }
 
-// =====================
-// INIT
-// =====================
-window.addEventListener("DOMContentLoaded", loadData);
+window.addEventListener("DOMContentLoaded", loadDriverData);

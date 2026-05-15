@@ -2,7 +2,7 @@
   "name": "mObywatel 4.0",
   "short_name": "mObywatel",
   "description": "mod by Rusky Dev's",
-  "start_url": "./documents.html",
+  "start_url": "./logowanie.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",

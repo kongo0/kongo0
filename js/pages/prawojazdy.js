@@ -1,22 +1,28 @@
 const mobyData = JSON.parse(localStorage.getItem("mobywatel_data") || "{}");
 
 /* =========================
-   HELPERS
+   HELPERS (FIXED)
 ========================= */
 
-function getData(key, fallbackKey) {
-    return (
-        mobyData[key] ??
-        localStorage.getItem(fallbackKey || key) ??
-        ""
-    );
+function getData(...keys) {
+    // sprawdza wiele możliwych kluczy (generator chaos fix)
+    for (let k of keys) {
+        const v =
+            mobyData?.[k] ??
+            localStorage.getItem(k);
+
+        if (v && v !== "undefined" && v !== "null") {
+            return v;
+        }
+    }
+    return "";
 }
 
 function setText(id, value) {
     const el = document.getElementById(id);
     if (!el) return;
 
-    if (!value || value === "Brak danych") {
+    if (!value || value.trim?.() === "") {
         el.textContent = "Brak danych";
         return;
     }
@@ -45,13 +51,16 @@ function formatDate(d) {
 }
 
 /* =========================
-   GENERATOR DANYCH
+   GENERATOR PRAWO JAZDY
 ========================= */
 
 function generatePrawoJazdyData() {
-    const birthRaw =
-        getData("birthDate", "birthday") ||
-        getData("birth_date");
+    const birthRaw = getData(
+        "birthDate",
+        "birthday",
+        "birth_date",
+        "dateOfBirth"
+    );
 
     let birthDate = new Date(birthRaw);
 
@@ -59,7 +68,6 @@ function generatePrawoJazdyData() {
         birthDate = new Date();
     }
 
-    // 18 lat + 7 dni
     const issueDate = new Date(birthDate);
     issueDate.setFullYear(issueDate.getFullYear() + 18);
     issueDate.setDate(issueDate.getDate() + 7);
@@ -83,23 +91,39 @@ function generatePrawoJazdyData() {
 ========================= */
 
 function loadData() {
+
     // ===== DANE OSOBOWE =====
-    setText("display-name", getData("name", "name"));
-    setText("display-surname", getData("surname", "surname"));
+    setText("display-name", getData("name"));
+    setText("display-surname", getData("surname"));
 
-    // 🔥 FIX: DATA + MIEJSCE
-    setText("display-birthDate", getData("birthDate", "birthday"));
-    setText("display-birthPlace", getData("birthPlace", "placeOfBirth"));
+    // 🔥 FIX NA 100% DATY URODZENIA
+    setText(
+        "display-birthDate",
+        getData(
+            "birthDate",
+            "birthday",
+            "birth_date",
+            "dateOfBirth"
+        )
+    );
 
-    setText("display-pesel", getData("pesel", "pesel"));
+    setText(
+        "display-birthPlace",
+        getData("birthPlace", "placeOfBirth")
+    );
+
+    setText("display-pesel", getData("pesel"));
 
     // zdjęcie
-    setImg("profileImage", getData("image", "profileImage"));
+    setImg(
+        "profileImage",
+        getData("image", "profileImage", "photo")
+    );
 
-    // kategoria zawsze B
+    // zawsze B
     setText("category", "B");
 
-    // ===== GENEROWANE DANE =====
+    // ===== DANE GENEROWANE =====
     const d = generatePrawoJazdyData();
 
     setText("display-issueDate", d.issueDate);
@@ -153,7 +177,7 @@ async function applyProfileImage() {
 }
 
 /* =========================
-   OSTATNIA AKTUALIZACJA (FIX = jak w dowod.js)
+   OSTATNIA AKTUALIZACJA (jak w dowód.js)
 ========================= */
 
 const UPDATE_KEY = "last_update_date";
@@ -169,8 +193,8 @@ function nowStr() {
 
 function loadUpdateDate() {
     const saved = localStorage.getItem(UPDATE_KEY);
-
     const el = document.getElementById("sukadziwkakurwa");
+
     if (el) {
         el.textContent = saved || nowStr();
     }

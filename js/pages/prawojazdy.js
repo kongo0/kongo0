@@ -1,55 +1,36 @@
 // =====================
-// PROFILE IMAGE
+// SAFE JSON
 // =====================
-async function applyProfileImage() {
+function safeJSON(key) {
   try {
-    const profileImage = document.getElementById("profileImage");
-    if (!profileImage) return;
-
-    const userDataRaw = localStorage.getItem("userProfileData");
-
-    // 1. generator (NAJWAŻNIEJSZE)
-    if (userDataRaw) {
-      try {
-        const userData = JSON.parse(userDataRaw);
-        if (userData.photo) {
-          profileImage.src = userData.photo;
-          profileImage.style.opacity = "1";
-          return;
-        }
-      } catch (_) {}
-    }
-
-    // 2. fallback
-    const stored =
-      localStorage.getItem("profileImage") || localStorage.getItem("photo");
-
-    if (stored) {
-      profileImage.src = stored;
-      profileImage.style.opacity = "1";
-    }
-  } catch (_) {}
+    return JSON.parse(localStorage.getItem(key));
+  } catch (_) {
+    return null;
+  }
 }
 
 // =====================
-// HELPERS
+// FORMATTER
 // =====================
-const up = (s) => (s ? String(s).toUpperCase() : s);
+const up = (v) => (v ? String(v).toUpperCase() : v);
 
-function formatDateDots(val) {
-  if (!val) return val;
-  const s = String(val).trim();
+function formatDate(v) {
+  if (!v) return v;
+  const s = String(v);
 
-  let m = s.match(/^(\d{4})[-./](\d{2})[-./](\d{2})$/);
+  let m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
   if (m) return `${m[3]}.${m[2]}.${m[1]}`;
 
-  m = s.match(/^(\d{2})[-./](\d{2})[-./](\d{4})$/);
+  m = s.match(/^(\d{2})-(\d{2})-(\d{4})$/);
   if (m) return `${m[1]}.${m[2]}.${m[3]}`;
 
-  return s.replace(/-/g, ".");
+  return s;
 }
 
-function setText(id, value, formatter) {
+// =====================
+// SET TEXT SAFE
+// =====================
+function set(id, value, formatter) {
   const el = document.getElementById(id);
   if (!el || value == null || value === "") return;
 
@@ -60,58 +41,74 @@ function setText(id, value, formatter) {
 }
 
 // =====================
-// MAIN DATA LOADING (FIX)
+// PROFILE IMAGE
+// =====================
+function setProfileImage(data) {
+  const img = document.getElementById("profileImage");
+  if (!img) return;
+
+  const photo =
+    (data && data.photo) ||
+    localStorage.getItem("profileImage") ||
+    localStorage.getItem("photo");
+
+  if (photo) {
+    img.src = photo;
+    img.style.opacity = "1";
+  }
+}
+
+// =====================
+// MAIN LOAD
 // =====================
 function loadDriverData() {
-  let userData = null;
+  const data = safeJSON("userProfileData") || {};
 
-  try {
-    userData = JSON.parse(localStorage.getItem("userProfileData") || "{}");
-  } catch (_) {}
+  console.log("[Prawojazdy] userProfileData:", data);
 
-  // jeśli generator istnieje → PRIORYTET
-  if (userData && Object.keys(userData).length > 0) {
-    setText("display-name", userData.name, up);
-    setText("display-surname", userData.surname, up);
-    setText("display-pesel", userData.pesel, up);
-    setText("display-birthDate", userData.birthDate, formatDateDots);
-    setText("display-birthPlace", userData.placeOfBirth, up);
-    setText("display-nationality", userData.nationality, up);
+  // =====================
+  // IMIĘ
+  // =====================
+  set("display-name", data.name, up);
 
-    // dodatkowe (jeśli są)
-    setText("display-category", userData.category || "B", up);
-    setText("display-documentNumber", userData.documentNumber, up);
-    setText("display-issuingAuthority", userData.issuingAuthority, up);
+  // =====================
+  // NAZWISKO
+  // =====================
+  set("display-surname", data.surname, up);
 
-    // WAŻNE: nie pokazuj "Brak danych"
-    return;
-  }
+  // =====================
+  // PESEL
+  // =====================
+  set("display-pesel", data.pesel, up);
 
-  // fallback (jeśli brak generatora)
-  const map = [
-    ["display-name", "display-name_prawojazdy", up],
-    ["display-surname", "display-surname_prawojazdy", up],
-    ["display-pesel", "display-pesel_prawojazdy", up],
-    ["display-birthDate", "display-birthDate_prawojazdy", formatDateDots],
-    ["display-birthPlace", "display-birthPlace_prawojazdy", up],
-    ["display-category", "display-category_prawojazdy", up],
-    ["display-documentNumber", "display-documentNumber_prawojazdy", up],
-    ["display-issuingAuthority", "display-issuingAuthority_prawojazdy", up],
-  ];
+  // =====================
+  // DATA URODZENIA
+  // =====================
+  set("display-birthDate", data.birthDate, formatDate);
 
-  map.forEach(([id, key, fmt]) => {
-    setText(id, localStorage.getItem(key), fmt);
-  });
+  // =====================
+  // MIEJSCE URODZENIA
+  // =====================
+  set("display-birthPlace", data.placeOfBirth, up);
+
+  // =====================
+  // KATEGORIA (fallback B)
+  // =====================
+  set("category", data.category || "B", up);
+
+  // =====================
+  // ZDJĘCIE
+  // =====================
+  setProfileImage(data);
 }
 
 // =====================
 // INIT
 // =====================
-window.addEventListener("DOMContentLoaded", async () => {
-  await applyProfileImage();
+window.addEventListener("DOMContentLoaded", () => {
   loadDriverData();
 
-  // clock (jeśli masz)
+  // zegar (opcjonalnie)
   const czasEl = document.querySelector(".czas");
   if (czasEl) {
     setInterval(() => {

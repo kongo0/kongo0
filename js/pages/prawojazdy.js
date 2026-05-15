@@ -10,10 +10,10 @@ function up(v) {
   return v ? String(v).toUpperCase() : v;
 }
 
-function formatDateDots(val) {
-  if (!val) return val;
+function formatDateDots(v) {
+  if (!v) return v;
 
-  const s = String(val).trim();
+  const s = String(v).trim();
 
   let m = s.match(/^(\d{4})[-./](\d{2})[-./](\d{2})$/);
   if (m) return `${m[3]}.${m[2]}.${m[1]}`;
@@ -24,68 +24,96 @@ function formatDateDots(val) {
   return s;
 }
 
-// =====================
-// SAFE SET (NIE NADPISUJE “Brak danych”)
-// =====================
-function setText(id, value, formatter, onlyIfEmpty = true) {
+function setText(id, value, formatter) {
   const el = document.getElementById(id);
   if (!el) return;
-
   if (value == null || value === "") return;
-
-  if (onlyIfEmpty && el.textContent && el.textContent !== "Brak danych") return;
 
   el.textContent = formatter ? formatter(value) : value;
 }
 
-// =====================
-// MAIN LOAD (NAPRAWIONE)
-// =====================
+// ============================
+// DATA WYDANIA (+18 + 7 dni)
+// ============================
+function calculateIssueDate(birthDate) {
+  if (!birthDate) return null;
+
+  const d = new Date(birthDate);
+  if (isNaN(d)) return null;
+
+  d.setFullYear(d.getFullYear() + 18);
+  d.setDate(d.getDate() + 7);
+
+  const pad = (n) => (n < 10 ? "0" + n : n);
+
+  return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()}`;
+}
+
+// ============================
+// LOAD DATA (GENERATOR FIX)
+// ============================
 function loadDriverData() {
   const data = safeJSON("userProfileData") || {};
 
-  console.log("[PJ] userProfileData:", data);
+  console.log("[PrawoJazdy] data:", data);
 
-  // ====== DANE Z GENERATORA (PRIORYTET) ======
-  setText("display-name", data.name, up);
-  setText("display-surname", data.surname, up);
-  setText("display-pesel", data.pesel, up);
-  setText("display-birthDate", data.birthDate, formatDateDots);
-  setText("display-birthPlace", data.placeOfBirth, up);
+  // =========================
+  // MAPOWANIE GENERATORA
+  // =========================
+  const name = data.name || data.firstName || "";
+  const surname = data.surname || data.lastName || "";
+  const pesel = data.pesel || "";
+  const birthDate = data.birthDate || data.dateOfBirth || "";
+  const place = data.placeOfBirth || data.birthPlace || "";
+  const photo = data.photo || data.image || "";
 
-  // ====== KATEGORIA ZAWSZE B ======
-  const cat = document.getElementById("category");
-  if (cat) cat.textContent = "B";
+  // =========================
+  // DANE OSOBOWE
+  // =========================
+  setText("display-name", name, up);
+  setText("display-surname", surname, up);
+  setText("display-pesel", pesel, up);
+  setText("display-birthDate", birthDate, formatDateDots);
+  setText("display-birthPlace", place, up);
 
-  // ====== ZDJĘCIE ======
+  // =========================
+  // ZDJĘCIE
+  // =========================
   const img = document.getElementById("profileImage");
-  if (img && data.photo) {
-    img.src = data.photo;
+  if (img && photo) {
+    img.src = photo;
     img.style.opacity = "1";
   }
 
-  // =====================
-  // RESZTA TWOJEGO SYSTEMU (BLANKIET ITD)
-  // NIE DOTYKAMY — ALE DOŁADOWUJEMY TYLKO JEŚLI BRAK
-  // =====================
+  // =========================
+  // KATEGORIA (ZAWSZE B)
+  // =========================
+  const cat = document.getElementById("category");
+  if (cat) cat.textContent = "B";
 
-  const extraMap = [
-    ["display-documentNumber", "display-documentNumber_prawojazdy", up],
-    ["display-blanketNumber", "display-blanketNumber_prawojazdy", up],
-    ["display-issuingAuthority", "display-issuingAuthority_prawojazdy", up],
-    ["display-issueDate", "display-issueDate_prawojazdy", formatDateDots],
-    ["display-expiryDate", "display-expiryDate_prawojazdy", formatDateDots],
-  ];
-
-  extraMap.forEach(([id, key, fmt]) => {
-    setText(id, localStorage.getItem(key), fmt, true);
-  });
-
-  // status blankietu fallback
-  const status = document.getElementById("display-blanketStatus");
-  if (status && status.textContent.trim() === "Brak danych") {
-    status.textContent = "WYDANY";
+  // =========================
+  // DATA WYDANIA (NAPRAWIONE)
+  // =========================
+  const issueDate = calculateIssueDate(birthDate);
+  if (issueDate) {
+    setText("display-issueDate", issueDate, formatDateDots);
   }
+
+  // =========================
+  // DEBUG
+  // =========================
+  console.log("[PrawoJazdy] parsed:", {
+    name,
+    surname,
+    pesel,
+    birthDate,
+    place,
+    photo: !!photo,
+    issueDate,
+  });
 }
 
+// ============================
+// INIT
+// =========================
 window.addEventListener("DOMContentLoaded", loadDriverData);

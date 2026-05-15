@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Login</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -20,25 +21,25 @@
     --text2:#888;
 }
 
-*{box-sizing:border-box}
+*{box-sizing:border-box; margin:0; padding:0;}
 
 body{
-    margin:0;
     font-family:'Inter',sans-serif;
-    height:100vh;
+    min-height:100vh;
     display:flex;
     justify-content:center;
     align-items:center;
-    color:var(--text);
     background:radial-gradient(circle at top left, #1c0a27 0%, transparent 40%),
                radial-gradient(circle at bottom right, rgba(150,0,255,0.15), transparent 50%),
                var(--bg-dark);
+    color:var(--text);
+    padding:15px;
 }
 
 .container{
     width:100%;
-    max-width:380px;
-    padding:30px;
+    max-width:400px;
+    padding:25px;
     border-radius:24px;
     background:var(--glass);
     border:1px solid var(--border);
@@ -56,7 +57,8 @@ h1{
 
 input{
     width:100%;
-    padding:14px;
+    padding:16px;
+    margin-top:12px;
     border-radius:12px;
     border:1px solid var(--border);
     background:rgba(0,0,0,0.4);
@@ -68,13 +70,13 @@ input{
 
 input:focus{
     border-color:var(--purple);
-    box-shadow:0 0 10px var(--glow);
+    box-shadow:0 0 12px var(--glow);
 }
 
 button{
     width:100%;
     margin-top:18px;
-    padding:14px;
+    padding:16px;
     border:none;
     border-radius:12px;
     background:var(--purple);
@@ -83,11 +85,19 @@ button{
     cursor:pointer;
     transition:0.2s;
     box-shadow:0 0 15px var(--glow);
+    font-size:1.05rem;
 }
 
 button:hover{
     transform:translateY(-2px);
     box-shadow:0 0 25px var(--glow);
+}
+
+#error{
+    margin-top:10px;
+    color:#ff4d4d;
+    font-size:0.9rem;
+    min-height:18px;
 }
 
 .small{
@@ -96,11 +106,18 @@ button:hover{
     color:var(--text2);
 }
 
-#error{
-    margin-top:10px;
-    color:#ff4d4d;
-    font-size:0.85rem;
-    min-height:18px;
+/* Responsywność dla małych ekranów */
+@media (max-width: 500px){
+    .container{
+        padding:20px;
+    }
+    input, button{
+        padding:14px;
+        font-size:1rem;
+    }
+    h1{
+        font-size:1.4rem;
+    }
 }
 </style>
 </head>
@@ -122,12 +139,9 @@ button:hover{
 <script src="js/tokens.js"></script>
 
 <script>
-
 function login(){
-
     const token = document.getElementById("token").value.trim();
     const error = document.getElementById("error");
-
     error.innerText = "";
 
     const data = TOKENS[token];
@@ -138,23 +152,17 @@ function login(){
     }
 
     if(data.expires){
-
         const now = new Date();
         const exp = new Date(data.expires);
-
         if(now > exp){
             error.innerText = "⛔ Token wygasł";
             return;
         }
     }
 
-    localStorage.setItem("session", JSON.stringify({
-        token: token
-    }));
-
+    localStorage.setItem("session", JSON.stringify({token: token}));
     window.location.href = "index.html";
 }
-
 </script>
 
 </body>

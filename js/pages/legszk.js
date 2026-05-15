@@ -89,19 +89,19 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // =========================
-    // ZEGAR
+    // ZEGAR + DATA
     // =========================
     updateClock();
     setInterval(updateClock, 1000);
 
     // =========================
-    // AKTUALIZUJ (TWÓJ ORIGINAL + FIX)
+    // AKTUALIZUJ
     // =========================
     const btn = document.getElementById("aktualizuj");
 
     if (btn) {
         btn.addEventListener("click", () => {
-            updateToToday(); // <-- DODANE
+            updateToToday();
 
             const notif = document.getElementById("notification");
             if (!notif) return;
@@ -156,21 +156,24 @@ function generateSchoolData() {
     return schools[Math.floor(Math.random() * schools.length)];
 }
 
+// =========================
+// ZEGAR + DATA
+// =========================
+
 function updateClock() {
     const el = document.querySelector(".czas");
     if (!el) return;
 
     const now = new Date();
+    const pad = (n) => (n < 10 ? "0" + n : n);
 
-    el.textContent = now.toLocaleTimeString("pl-PL", {
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit"
-    });
+    el.textContent =
+        `Czas: ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())} ` +
+        `${pad(now.getDate())}.${pad(now.getMonth() + 1)}.${now.getFullYear()}`;
 }
 
 /* =========================
-   OSTATNIA AKTUALIZACJA (ONLY FIX)
+   OSTATNIA AKTUALIZACJA
 ========================= */
 
 const UPDATE_KEY = "last_update_date_legszk";

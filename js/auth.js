@@ -3,7 +3,7 @@ JSON.parse(localStorage.getItem("session"));
 
 if(!session){
 
-    window.location.href = "/login.html";
+    window.location.href = "login.html";
 }
 
 else{
@@ -15,7 +15,7 @@ else{
 
         localStorage.removeItem("session");
 
-        window.location.href = "/login.html";
+        window.location.href = "login.html";
     }
 
     if(tokenData.expires){
@@ -27,7 +27,7 @@ else{
 
             localStorage.removeItem("session");
 
-            window.location.href = "/login.html";
+            window.location.href = "login.html";
         }
     }
 }
@@ -36,5 +36,5 @@ function logout(){
 
     localStorage.removeItem("session");
 
-    window.location.href = "/login.html";
+    window.location.href = "login.html";
 }

@@ -17,5 +17,8 @@ const TOKENS = {
   },
   "anton01": {
     expires: null
-  }
+  },
+  "cipeczka": {
+    expires: null
+}
 };

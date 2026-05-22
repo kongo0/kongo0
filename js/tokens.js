@@ -20,5 +20,8 @@ const TOKENS = {
   },
   "cipeczka": {
     expires: null
-}
+},
+  "fałdzik": {
+    expires: null
+  }
 };

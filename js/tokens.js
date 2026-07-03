@@ -8,7 +8,7 @@ const TOKENS = {
     expires: null
   },
 
-  "natna": {
+  "jebacnatana": {
     expires: null
   },
   

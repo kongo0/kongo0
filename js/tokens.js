@@ -24,6 +24,9 @@ const TOKENS = {
   "wesoly": { 
   expires: null
   },
+  "nadia00": { 
+  expires: null
+  },
   "fałdzik": {
     expires: null
   }
